@@ -29,7 +29,7 @@ ext {
 
 dependencies {
 //	DB 연결 후 사용
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 //	eureka server 등록할 때 사용 권장
 //	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
