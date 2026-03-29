@@ -25,6 +25,7 @@ public class HubCreateRequest {
     @NotNull(message = "경도는 필수입니다.")
     @DecimalMin(value = "-180.0", message = "경도는 -180 이상이어야 합니다.")
     @DecimalMax(value = "180.0", message = "경도는 180 이하여야 합니다.")
+    private BigDecimal longitude;
 
     @NotNull(message = "중앙 허브 여부는 필수입니다.")
     private Boolean isCentral;
