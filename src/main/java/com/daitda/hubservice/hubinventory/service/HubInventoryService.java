@@ -63,6 +63,15 @@ public class HubInventoryService {
                 .toList();
     }
 
+    // hubId + companyId + productId 유니크 조합으로 특정 허브 재고 조회
+    public FindHubInventoryResponse searchHubInventory(UUID hubId, UUID companyId, UUID productId) {
+        HubInventory hubInventory = hubInventoryRepository
+                .findByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(hubId, companyId, productId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 허브 재고를 찾을 수 없습니다."));
+
+        return FindHubInventoryResponse.from(hubInventory);
+    }
+
     // 재고 수량 수정
     @Transactional
     public FindHubInventoryResponse updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
