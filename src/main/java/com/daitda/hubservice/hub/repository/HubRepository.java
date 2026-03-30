@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface HubRepository extends JpaRepository<Hub, Long> {
+public interface HubRepository extends JpaRepository<Hub, UUID> {
 
     Optional<Hub> findByHubIdAndDeletedAtIsNull(UUID hubId);
 
