@@ -1,11 +1,11 @@
-package com.daitda.hubservice.hubinventory.controller;
+package com.daitda.hubservice.domain.hubinventory.presentation.controller;
 
-import com.daitda.hubservice.hubinventory.dto.command.DecreaseHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.command.RestoreHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.request.DecreaseHubInventoryRequest;
-import com.daitda.hubservice.hubinventory.dto.request.RestoreHubInventoryRequest;
-import com.daitda.hubservice.hubinventory.dto.response.FindHubInventoryResponse;
-import com.daitda.hubservice.hubinventory.service.HubInventoryService;
+import com.daitda.hubservice.domain.hubinventory.application.dto.DecreaseHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.RestoreHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.DecreaseHubInventoryRequest;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.RestoreHubInventoryRequest;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.application.service.HubInventoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;

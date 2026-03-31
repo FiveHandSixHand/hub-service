@@ -1,12 +1,12 @@
-package com.daitda.hubservice.hubinventory.controller;
+package com.daitda.hubservice.domain.hubinventory.presentation.controller;
 
-import com.daitda.hubservice.hubinventory.dto.command.CreateHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.command.UpdateHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.request.CreateHubInventoryRequest;
-import com.daitda.hubservice.hubinventory.dto.request.UpdateHubInventoryRequest;
-import com.daitda.hubservice.hubinventory.dto.response.FindHubInventoryResponse;
-import com.daitda.hubservice.hubinventory.dto.response.ListHubInventoryResponse;
-import com.daitda.hubservice.hubinventory.service.HubInventoryService;
+import com.daitda.hubservice.domain.hubinventory.application.dto.CreateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.UpdateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.CreateHubInventoryRequest;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.UpdateHubInventoryRequest;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.ListHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.application.service.HubInventoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

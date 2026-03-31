@@ -1,4 +1,4 @@
-package com.daitda.hubservice.hubinventory.entity;
+package com.daitda.hubservice.domain.hubinventory.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

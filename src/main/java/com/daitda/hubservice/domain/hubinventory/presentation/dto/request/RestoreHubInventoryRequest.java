@@ -1,9 +1,8 @@
-package com.daitda.hubservice.hubinventory.dto.request;
+package com.daitda.hubservice.domain.hubinventory.presentation.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import org.springframework.context.annotation.Primary;
 
 import java.util.UUID;
 

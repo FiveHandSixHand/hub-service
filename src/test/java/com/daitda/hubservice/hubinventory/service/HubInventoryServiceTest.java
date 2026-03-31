@@ -1,9 +1,10 @@
 package com.daitda.hubservice.hubinventory.service;
 
-import com.daitda.hubservice.hubinventory.dto.command.CreateHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.response.FindHubInventoryResponse;
-import com.daitda.hubservice.hubinventory.entity.HubInventory;
-import com.daitda.hubservice.hubinventory.repository.HubInventoryRepository;
+import com.daitda.hubservice.domain.hubinventory.application.dto.CreateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.service.HubInventoryService;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
+import com.daitda.hubservice.domain.hubinventory.domain.repository.HubInventoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

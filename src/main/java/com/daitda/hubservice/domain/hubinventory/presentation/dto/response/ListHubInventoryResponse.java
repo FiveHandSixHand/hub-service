@@ -1,6 +1,6 @@
-package com.daitda.hubservice.hubinventory.dto.response;
+package com.daitda.hubservice.domain.hubinventory.presentation.dto.response;
 
-import com.daitda.hubservice.hubinventory.entity.HubInventory;
+import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
 import lombok.Builder;
 import lombok.Getter;
 

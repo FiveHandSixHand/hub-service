@@ -1,6 +1,5 @@
-package com.daitda.hubservice.hubinventory.dto.request;
+package com.daitda.hubservice.domain.hubinventory.presentation.dto.request;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

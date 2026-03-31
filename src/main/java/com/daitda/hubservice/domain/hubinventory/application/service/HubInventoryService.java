@@ -1,13 +1,13 @@
-package com.daitda.hubservice.hubinventory.service;
+package com.daitda.hubservice.domain.hubinventory.application.service;
 
-import com.daitda.hubservice.hubinventory.dto.command.CreateHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.command.DecreaseHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.command.RestoreHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.command.UpdateHubInventoryCommand;
-import com.daitda.hubservice.hubinventory.dto.response.FindHubInventoryResponse;
-import com.daitda.hubservice.hubinventory.dto.response.ListHubInventoryResponse;
-import com.daitda.hubservice.hubinventory.entity.HubInventory;
-import com.daitda.hubservice.hubinventory.repository.HubInventoryRepository;
+import com.daitda.hubservice.domain.hubinventory.application.dto.CreateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.DecreaseHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.RestoreHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.UpdateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.ListHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
+import com.daitda.hubservice.domain.hubinventory.domain.repository.HubInventoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
