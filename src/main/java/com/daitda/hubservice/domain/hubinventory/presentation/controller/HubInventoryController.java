@@ -1,7 +1,7 @@
 package com.daitda.hubservice.domain.hubinventory.presentation.controller;
 
-import com.daitda.hubservice.domain.hubinventory.application.dto.CreateHubInventoryCommand;
-import com.daitda.hubservice.domain.hubinventory.application.dto.UpdateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.command.CreateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.dto.command.UpdateHubInventoryCommand;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.CreateHubInventoryRequest;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.UpdateHubInventoryRequest;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
