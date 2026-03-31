@@ -42,7 +42,7 @@ public class HubInventoryInternalController {
     @PatchMapping("/restore")
     public ResponseEntity<FindHubInventoryResponse> restoreHubInventory(@Valid @RequestBody RestoreHubInventoryRequest request) {
         RestoreHubInventoryCommand command = RestoreHubInventoryCommand.builder()
-                .hubInventoryId(request.getHubInventoryID())
+                .hubInventoryId(request.getHubInventoryId())
                 .quantity(request.getQuantity())
                 .build();
 
