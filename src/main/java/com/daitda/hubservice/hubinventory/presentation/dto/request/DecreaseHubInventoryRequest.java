@@ -1,4 +1,4 @@
-package com.daitda.hubservice.domain.hubinventory.presentation.dto.request;
+package com.daitda.hubservice.hubinventory.presentation.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

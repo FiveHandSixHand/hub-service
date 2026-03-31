@@ -1,7 +1,6 @@
-package com.daitda.hubservice.domain.hubinventory.application.result;
+package com.daitda.hubservice.hubinventory.application.result;
 
-import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
-import org.hibernate.annotations.processing.Find;
+import com.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

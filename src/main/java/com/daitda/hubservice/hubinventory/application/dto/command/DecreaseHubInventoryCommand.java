@@ -1,4 +1,4 @@
-package com.daitda.hubservice.domain.hubinventory.application.dto.command;
+package com.daitda.hubservice.hubinventory.application.dto.command;
 
 import lombok.Builder;
 import lombok.Getter;

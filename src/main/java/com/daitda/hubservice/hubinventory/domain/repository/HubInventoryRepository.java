@@ -1,6 +1,6 @@
-package com.daitda.hubservice.domain.hubinventory.domain.repository;
+package com.daitda.hubservice.hubinventory.domain.repository;
 
-import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
+import com.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
