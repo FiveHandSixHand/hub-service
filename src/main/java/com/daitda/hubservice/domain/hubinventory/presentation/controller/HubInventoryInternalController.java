@@ -2,6 +2,7 @@ package com.daitda.hubservice.domain.hubinventory.presentation.controller;
 
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.DecreaseHubInventoryCommand;
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.RestoreHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.result.FindHubInventoryResult;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.DecreaseHubInventoryRequest;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.RestoreHubInventoryRequest;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
@@ -31,7 +32,8 @@ public class HubInventoryInternalController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResponse response = hubInventoryService.decreaseHubInventory(command, null);
+        FindHubInventoryResult result = hubInventoryService.decreaseHubInventory(command, null);
+        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.ok(response);
     }
@@ -44,7 +46,8 @@ public class HubInventoryInternalController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResponse response = hubInventoryService.restoreHubInventory(command, null);
+        FindHubInventoryResult result = hubInventoryService.restoreHubInventory(command, null);
+        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.ok(response);
     }

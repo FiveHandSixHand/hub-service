@@ -4,8 +4,8 @@ import com.daitda.hubservice.domain.hubinventory.application.dto.command.CreateH
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.DecreaseHubInventoryCommand;
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.RestoreHubInventoryCommand;
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.UpdateHubInventoryCommand;
-import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
-import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.ListHubInventoryResponse;
+import com.daitda.hubservice.domain.hubinventory.application.result.FindHubInventoryResult;
+import com.daitda.hubservice.domain.hubinventory.application.result.ListHubInventoryResult;
 import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
 import com.daitda.hubservice.domain.hubinventory.domain.repository.HubInventoryRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class HubInventoryService {
 
     // 재고생성
     @Transactional
-    public FindHubInventoryResponse createHubInventory(CreateHubInventoryCommand command, UUID createdBy) {
+    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, UUID createdBy) {
         validateDuplicateHubInventory(command.getHubId(), command.getCompanyId(), command.getProductId());
 
         HubInventory hubInventory = HubInventory.create(
@@ -38,68 +38,68 @@ public class HubInventoryService {
         );
 
         HubInventory savedHubInventory = hubInventoryRepository.save(hubInventory);
-        return FindHubInventoryResponse.from(savedHubInventory);
+        return FindHubInventoryResult.from(savedHubInventory);
     }
 
     // 특정 재고 조회
-    public FindHubInventoryResponse getHubInventory(UUID hubInventoryId) {
+    public FindHubInventoryResult getHubInventory(UUID hubInventoryId) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
-        return FindHubInventoryResponse.from(hubInventory);
+        return FindHubInventoryResult.from(hubInventory);
     }
 
     // 전체 재고 목록 조회
-    public List<ListHubInventoryResponse> getHubInventories() {
+    public List<ListHubInventoryResult> getHubInventories() {
         return hubInventoryRepository.findAllByDeletedAtIsNull()
                 .stream()
-                .map(hubInventory -> ListHubInventoryResponse.from(hubInventory))
+                .map(hubInventory -> ListHubInventoryResult.from(hubInventory))
                 .toList();
     }
 
     // 특정 허브 기준 재고 조회
-    public List<ListHubInventoryResponse> getHubInventoriesByHub(UUID hubId) {
+    public List<ListHubInventoryResult> getHubInventoriesByHub(UUID hubId) {
         return hubInventoryRepository.findAllByHubIdAndDeletedAtIsNull(hubId)
                 .stream()
-                .map(hubInventory -> ListHubInventoryResponse.from(hubInventory))
+                .map(hubInventory -> ListHubInventoryResult.from(hubInventory))
                 .toList();
     }
 
     // hubId + companyId + productId 유니크 조합으로 특정 허브 재고 조회
-    public FindHubInventoryResponse searchHubInventory(UUID hubId, UUID companyId, UUID productId) {
+    public FindHubInventoryResult searchHubInventory(UUID hubId, UUID companyId, UUID productId) {
         HubInventory hubInventory = hubInventoryRepository
                 .findByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(hubId, companyId, productId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브 재고를 찾을 수 없습니다."));
 
-        return FindHubInventoryResponse.from(hubInventory);
+        return FindHubInventoryResult.from(hubInventory);
     }
 
     // 재고 수량 수정
     @Transactional
-    public FindHubInventoryResponse updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
 
         hubInventory.updateQuantity(command.getQuantity(), updatedBy);
 
-        return FindHubInventoryResponse.from(hubInventory);
+        return FindHubInventoryResult.from(hubInventory);
     }
 
     // 재고 차감
     @Transactional
-    public FindHubInventoryResponse decreaseHubInventory(DecreaseHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
         hubInventory.decrease(command.getQuantity(), updatedBy);
 
-        return FindHubInventoryResponse.from(hubInventory);
+        return FindHubInventoryResult.from(hubInventory);
     }
 
     // 재고 복원
     @Transactional
-    public FindHubInventoryResponse restoreHubInventory(RestoreHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
         hubInventory.restore(command.getQuantity(), updatedBy);
 
-        return FindHubInventoryResponse.from(hubInventory);
+        return FindHubInventoryResult.from(hubInventory);
     }
 
     // 논리 삭제

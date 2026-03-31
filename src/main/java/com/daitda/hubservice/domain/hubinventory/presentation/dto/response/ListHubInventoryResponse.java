@@ -1,6 +1,6 @@
 package com.daitda.hubservice.domain.hubinventory.presentation.dto.response;
 
-import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
+import com.daitda.hubservice.domain.hubinventory.application.result.ListHubInventoryResult;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,13 +17,13 @@ public class ListHubInventoryResponse {
     private Integer quantity;
 
     // 매개변수를 하나 받아서 해당 타입의 인스턴스를 반환
-    public static ListHubInventoryResponse from(HubInventory hubInventory) {
+    public static ListHubInventoryResponse from(ListHubInventoryResult result) {
         return ListHubInventoryResponse.builder()
-                .hubInventoryId(hubInventory.getHubInventoryId())
-                .hubId(hubInventory.getHubId())
-                .companyId(hubInventory.getCompanyId())
-                .productId(hubInventory.getProductId())
-                .quantity(hubInventory.getQuantity())
+                .hubInventoryId(result.hubInventoryId())
+                .hubId(result.hubId())
+                .companyId(result.companyId())
+                .productId(result.productId())
+                .quantity(result.quantity())
                 .build();
     }
 }

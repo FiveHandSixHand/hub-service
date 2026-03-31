@@ -1,6 +1,6 @@
 package com.daitda.hubservice.domain.hubinventory.presentation.dto.response;
 
-import com.daitda.hubservice.domain.hubinventory.domain.entity.HubInventory;
+import com.daitda.hubservice.domain.hubinventory.application.result.FindHubInventoryResult;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,15 +20,15 @@ public class FindHubInventoryResponse {
     private OffsetDateTime updatedAt;
 
     // 매개변수를 하나 받아서 해당 타입의 인스턴스를 반환
-    public static FindHubInventoryResponse from(HubInventory hubInventory) {
+    public static FindHubInventoryResponse from(FindHubInventoryResult result) {
         return FindHubInventoryResponse.builder()
-                .hubInventoryId(hubInventory.getHubInventoryId())
-                .hubId(hubInventory.getHubId())
-                .companyId(hubInventory.getCompanyId())
-                .productId(hubInventory.getProductId())
-                .quantity(hubInventory.getQuantity())
-                .createdAt(hubInventory.getCreatedAt())
-                .updatedAt(hubInventory.getUpdatedAt())
+                .hubInventoryId(result.hubInventoryId())
+                .hubId(result.hubId())
+                .companyId(result.companyId())
+                .productId(result.productId())
+                .quantity(result.quantity())
+                .createdAt(result.createdAt())
+                .updatedAt(result.updatedAt())
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package com.daitda.hubservice.domain.hubinventory.presentation.controller;
 
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.CreateHubInventoryCommand;
 import com.daitda.hubservice.domain.hubinventory.application.dto.command.UpdateHubInventoryCommand;
+import com.daitda.hubservice.domain.hubinventory.application.result.FindHubInventoryResult;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.CreateHubInventoryRequest;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.request.UpdateHubInventoryRequest;
 import com.daitda.hubservice.domain.hubinventory.presentation.dto.response.FindHubInventoryResponse;
@@ -36,7 +37,8 @@ public class HubInventoryController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResponse response = hubInventoryService.createHubInventory(command, null);
+        FindHubInventoryResult result = hubInventoryService.createHubInventory(command, null);
+        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -44,7 +46,11 @@ public class HubInventoryController {
     // 전체 재고 목록 조회
     @GetMapping
     public ResponseEntity<List<ListHubInventoryResponse>> getHubInventories() {
-        List<ListHubInventoryResponse> responses = hubInventoryService.getHubInventories();
+        List<ListHubInventoryResponse> responses = hubInventoryService.getHubInventories()
+                .stream()
+                .map(response -> ListHubInventoryResponse.from(response))
+                .toList();
+
         return ResponseEntity.ok(responses);
     }
 
@@ -53,7 +59,8 @@ public class HubInventoryController {
     public ResponseEntity<FindHubInventoryResponse> searchHubInventory(@RequestParam UUID hubId,
                                                                          @RequestParam UUID companyId,
                                                                          @RequestParam UUID productId) {
-        FindHubInventoryResponse response = hubInventoryService.searchHubInventory(hubId, companyId, productId);
+        FindHubInventoryResult result = hubInventoryService.searchHubInventory(hubId, companyId, productId);
+        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.ok(response);
     }
@@ -61,7 +68,9 @@ public class HubInventoryController {
     // 특정 허브 재고 상세 조회
     @GetMapping("/{hubInventoryId}")
     public ResponseEntity<FindHubInventoryResponse> getHubInventory(@PathVariable UUID hubInventoryId) {
-        FindHubInventoryResponse response = hubInventoryService.getHubInventory(hubInventoryId);
+        FindHubInventoryResult result = hubInventoryService.getHubInventory(hubInventoryId);
+        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
+
         return ResponseEntity.ok(response);
     }
 
@@ -73,7 +82,8 @@ public class HubInventoryController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResponse response = hubInventoryService.updateHubInventory(hubInventoryId, command, null);
+        FindHubInventoryResult result = hubInventoryService.updateHubInventory(hubInventoryId, command, null);
+        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.ok(response);
     }
