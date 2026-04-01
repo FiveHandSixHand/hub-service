@@ -1,5 +1,7 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
+import com.fhsh.daitda.exception.BusinessException;
+import com.fhsh.daitda.exception.ErrorCode;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
@@ -92,8 +94,9 @@ public class HubInventoryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 등록된 허브 재고입니다.");
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.CONFLICT);
 
         verify(hubInventoryRepository, never()).saveAndFlush(any(HubInventory.class));
     }
@@ -137,8 +140,9 @@ public class HubInventoryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 등록된 허브 재고입니다.");
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.CONFLICT);
     }
 
     private HubInventory 생성된재고(int quantity) {
