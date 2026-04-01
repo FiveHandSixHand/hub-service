@@ -1,12 +1,11 @@
 package com.fhsh.daitda.hubservice.hub.presentation.dto.response;
 
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
-import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -19,8 +18,8 @@ public class HubResponse {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private boolean isCentral;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static HubResponse from(FindHubResult result) {
 

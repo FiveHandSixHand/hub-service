@@ -1,6 +1,7 @@
 package com.fhsh.daitda.hubservice.hub.domain.entity;
 
 
+import com.fhsh.daitda.domain.BaseUserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,14 +9,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
 @Entity
 @Table(name = "p_hub")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Hub {
+public class Hub extends BaseUserEntity {
 
     @Id
     @Column(name = "hub_id", nullable = false, updatable = false)
@@ -36,28 +36,10 @@ public class Hub {
     @Column(name = "is_central", nullable = false)
     private boolean isCentral;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
-
-    @Column(name = "deleted_by")
-    private UUID deletedBy;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Hub(UUID hubId, String hubName, String hubAddress, BigDecimal latitude,
-                BigDecimal longitude, boolean isCentral, OffsetDateTime createdAt, UUID createdBy,
-                OffsetDateTime updatedAt, UUID updatedBy, OffsetDateTime deletedAt, UUID deletedBy) {
+    private Hub(UUID hubId, String hubName, String hubAddress,
+                BigDecimal latitude, BigDecimal longitude, boolean isCentral) {
 
         this.hubId = hubId;
         this.hubName = hubName;
@@ -65,25 +47,21 @@ public class Hub {
         this.latitude = latitude;
         this.longitude = longitude;
         this.isCentral = isCentral;
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-        this.updatedAt = updatedAt;
-        this.updatedBy = updatedBy;
-        this.deletedAt = deletedAt;
-        this.deletedBy = deletedBy;
     }
 
     public static Hub create(String hubName, String hubAddress, BigDecimal latitude,
-                             BigDecimal longitude, boolean isCentral, UUID createdBy) {
+                             BigDecimal longitude, boolean isCentral, String createdBy) {
 
-        return Hub.builder()
+        Hub hub =  Hub.builder()
                 .hubName(hubName)
                 .hubAddress(hubAddress)
                 .latitude(latitude)
                 .longitude(longitude)
                 .isCentral(isCentral)
-                .createdBy(createdBy)
                 .build();
+
+        hub.createdBy = createdBy;
+        return hub;
     }
 
     @PrePersist
@@ -91,13 +69,10 @@ public class Hub {
         if (this.hubId == null) {
             this.hubId = UUID.randomUUID();
         }
-        if (this.createdAt == null) {
-            this.createdAt = OffsetDateTime.now();
-        }
     }
 
     public void update(String hubName, String hubAddress, BigDecimal latitude,
-                       BigDecimal longitude, Boolean isCentral, UUID updatedBy) {
+                       BigDecimal longitude, Boolean isCentral, String updatedBy) {
 
         this.hubName = hubName;
         this.hubAddress = hubAddress;
@@ -107,9 +82,8 @@ public class Hub {
         this.updatedBy = updatedBy;
     }
 
-    public void softDelete(UUID deletedBy) {
-        this.deletedAt = OffsetDateTime.now();
-        this.deletedBy = deletedBy;
+    public void softDelete(String deletedBy) {
+        delete(deletedBy);
     }
 
 }
