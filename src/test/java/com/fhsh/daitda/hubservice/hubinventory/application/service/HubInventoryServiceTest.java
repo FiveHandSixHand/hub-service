@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
@@ -50,7 +51,7 @@ public class HubInventoryServiceTest {
         when(hubInventoryRepository.existsByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(HUB_ID, COMPANY_ID, PRODUCT_ID))
                 .thenReturn(false);
 
-        when(hubInventoryRepository.save(any(HubInventory.class)))
+        when(hubInventoryRepository.saveAndFlush(any(HubInventory.class)))
                 .thenAnswer(invocationOnMock -> {
                     HubInventory inventory = invocationOnMock.getArgument(0);
                     ReflectionTestUtils.invokeMethod(inventory, "prePersist");
@@ -70,7 +71,7 @@ public class HubInventoryServiceTest {
         assertThat(result.createdAt()).isNotNull();
 
         verify(hubInventoryRepository).existsByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(HUB_ID, COMPANY_ID, PRODUCT_ID);
-        verify(hubInventoryRepository).save(any(HubInventory.class));
+        verify(hubInventoryRepository).saveAndFlush(any(HubInventory.class));
     }
 
     @Test
@@ -92,7 +93,7 @@ public class HubInventoryServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 등록된 허브 재고입니다.");
 
-        verify(hubInventoryRepository, never()).save(any(HubInventory.class));
+        verify(hubInventoryRepository, never()).saveAndFlush(any(HubInventory.class));
     }
 
     @Test
@@ -113,6 +114,29 @@ public class HubInventoryServiceTest {
         assertThatThrownBy(() -> hubInventoryService.decreaseHubInventory(command, USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("재고가 부족합니다.");
+    }
+
+    @Test
+    @DisplayName("DB 유니크 제약 위반 시 중복 예외 반환")
+    void 중복재고생성_DB제약위반실패(){
+        // given
+        CreateHubInventoryCommand command = CreateHubInventoryCommand.builder()
+                .hubId(HUB_ID)
+                .companyId(COMPANY_ID)
+                .productId(PRODUCT_ID)
+                .quantity(100)
+                .build();
+
+        when(hubInventoryRepository.existsByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(HUB_ID, COMPANY_ID, PRODUCT_ID))
+                .thenReturn(false);
+
+        when(hubInventoryRepository.saveAndFlush(any(HubInventory.class)))
+                .thenThrow(new DataIntegrityViolationException("고유 제약 조건 위반"));
+
+        // when & then
+        assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 등록된 허브 재고입니다.");
     }
 
     private HubInventory 생성된재고(int quantity) {
