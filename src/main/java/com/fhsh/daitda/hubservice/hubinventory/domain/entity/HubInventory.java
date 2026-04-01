@@ -21,6 +21,14 @@ public class HubInventory {
     @Column(name = "hub_inventory_id", nullable = false, updatable = false)
     private UUID hubInventoryId;
 
+    /*
+    * update / decrease / restore처럼 동일 재고 row를 수정하는 경로가 있어서
+    * @Version 기반 Optimistic Lock을 적용
+    */
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "hub_id", nullable = false)
     private UUID hubId;
 
