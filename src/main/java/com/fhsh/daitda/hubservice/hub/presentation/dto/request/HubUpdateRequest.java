@@ -1,4 +1,4 @@
-package com.fhsh.daitda.hubservice.hub.dto.request;
+package com.fhsh.daitda.hubservice.hub.presentation.dto.request;
 
 
 import jakarta.validation.constraints.DecimalMax;
