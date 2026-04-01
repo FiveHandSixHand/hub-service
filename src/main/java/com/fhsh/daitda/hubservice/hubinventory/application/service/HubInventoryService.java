@@ -42,7 +42,7 @@ public class HubInventoryService {
             HubInventory savedHubInventory = hubInventoryRepository.saveAndFlush(hubInventory);
             return FindHubInventoryResult.from(savedHubInventory);
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("이미 등록된 허브 재고 입니다.");
+            throw new IllegalArgumentException("이미 등록된 허브 재고입니다.");
         }
     }
 
