@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class HubInventoryServiceTest {
     private static final UUID COMPANY_ID = UUID.randomUUID();
     private static final UUID PRODUCT_ID = UUID.randomUUID();
     private static final UUID HUB_INVENTORY_ID = UUID.randomUUID();
-    private static final UUID USER_ID = UUID.randomUUID();
+    private static final String USER_ID = "test-user";
 
     @Test
     @DisplayName("허브 재고 생성 성공")
@@ -56,6 +57,7 @@ public class HubInventoryServiceTest {
                     HubInventory inventory = invocationOnMock.getArgument(0);
                     ReflectionTestUtils.invokeMethod(inventory, "prePersist");
                     ReflectionTestUtils.setField(inventory, "hubInventoryId", HUB_INVENTORY_ID);
+                    ReflectionTestUtils.setField(inventory,"createdAt", LocalDateTime.now());
                     return inventory;
                 });
 

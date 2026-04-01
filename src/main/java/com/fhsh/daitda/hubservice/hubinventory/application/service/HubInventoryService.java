@@ -8,9 +8,9 @@ import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInvento
 import com.fhsh.daitda.hubservice.hubinventory.application.result.ListHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.repository.HubInventoryRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class HubInventoryService {
 
     // 재고생성
     @Transactional
-    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, UUID createdBy) {
+    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, String createdBy) {
         validateDuplicateHubInventory(command.getHubId(), command.getCompanyId(), command.getProductId());
 
         HubInventory hubInventory = HubInventory.create(
@@ -79,7 +79,7 @@ public class HubInventoryService {
 
     // 재고 수량 수정
     @Transactional
-    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, String updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
 
         hubInventory.updateQuantity(command.getQuantity(), updatedBy);
@@ -89,7 +89,7 @@ public class HubInventoryService {
 
     // 재고 차감
     @Transactional
-    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, String updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
         hubInventory.decrease(command.getQuantity(), updatedBy);
@@ -99,17 +99,17 @@ public class HubInventoryService {
 
     // 재고 복원
     @Transactional
-    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, String updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
-        hubInventory.restore(command.getQuantity(), updatedBy);
+        hubInventory.restoreQuantity(command.getQuantity(), updatedBy);
 
         return FindHubInventoryResult.from(hubInventory);
     }
 
     // 논리 삭제
     @Transactional
-    public void deleteHubInventory(UUID hubInventoryId, UUID deletedBy) {
+    public void deleteHubInventory(UUID hubInventoryId, String deletedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
         hubInventory.softDelete(deletedBy);
     }
