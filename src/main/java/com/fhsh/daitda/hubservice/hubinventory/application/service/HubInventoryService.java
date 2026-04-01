@@ -10,6 +10,7 @@ import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.repository.HubInventoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,8 +38,12 @@ public class HubInventoryService {
                 createdBy
         );
 
-        HubInventory savedHubInventory = hubInventoryRepository.save(hubInventory);
-        return FindHubInventoryResult.from(savedHubInventory);
+        try {
+            HubInventory savedHubInventory = hubInventoryRepository.saveAndFlush(hubInventory);
+            return FindHubInventoryResult.from(savedHubInventory);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("이미 등록된 허브 재고 입니다.");
+        }
     }
 
     // 특정 재고 조회
