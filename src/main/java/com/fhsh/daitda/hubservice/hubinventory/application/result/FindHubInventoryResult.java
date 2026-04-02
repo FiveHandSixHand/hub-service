@@ -2,7 +2,7 @@ package com.fhsh.daitda.hubservice.hubinventory.application.result;
 
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record FindHubInventoryResult(
@@ -11,8 +11,8 @@ public record FindHubInventoryResult(
         UUID companyId,
         UUID productId,
         Integer quantity,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static FindHubInventoryResult from(HubInventory hubInventory) {
         return new FindHubInventoryResult(

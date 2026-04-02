@@ -1,12 +1,12 @@
 package com.fhsh.daitda.hubservice.hubinventory.domain.entity;
 
+import com.fhsh.daitda.domain.BaseUserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -15,7 +15,7 @@ import java.util.UUID;
         @UniqueConstraint(name = "uk_hub_inventory_hub_company_product", columnNames = {"hub_id", "company_id", "product_id"})
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class HubInventory {
+public class HubInventory extends BaseUserEntity {
 
     @Id
     @Column(name = "hub_inventory_id", nullable = false, updatable = false)
@@ -41,55 +41,32 @@ public class HubInventory {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @Column(name = "deleted_at")
-    private OffsetDateTime deletedAt;
-
-    @Column(name = "deleted_by")
-    private UUID deletedBy;
-
     @Builder(access = AccessLevel.PRIVATE)
-    private HubInventory(UUID hubInventoryId, UUID hubId, UUID companyId, UUID productId,
-                         Integer quantity, OffsetDateTime createdAt, UUID createdBy, OffsetDateTime updatedAt,
-                         UUID updatedBy, OffsetDateTime deletedAt, UUID deletedBy) {
+    private HubInventory(UUID hubInventoryId, UUID hubId, UUID companyId,
+                         UUID productId, Integer quantity) {
 
         this.hubInventoryId = hubInventoryId;
         this.hubId = hubId;
         this.companyId = companyId;
         this.productId = productId;
         this.quantity = quantity;
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-        this.updatedAt = updatedAt;
-        this.updatedBy = updatedBy;
-        this.deletedAt = deletedAt;
-        this.deletedBy = deletedBy;
     }
 
     public static HubInventory create(UUID hubId, UUID companyId, UUID productId,
-                                      Integer quantity, UUID createdBy) {
+                                      Integer quantity, String createdBy) {
 
         validateRequiredIds(hubId, companyId, productId);
         validateNonNegativeQuantity(quantity);
 
-        return HubInventory.builder()
+        HubInventory hubInventory = HubInventory.builder()
                 .hubId(hubId)
                 .companyId(companyId)
                 .productId(productId)
                 .quantity(quantity)
-                .createdBy(createdBy)
                 .build();
+
+        hubInventory.createdBy = createdBy;
+        return hubInventory;
     }
 
     @PrePersist
@@ -97,20 +74,16 @@ public class HubInventory {
         if (this.hubInventoryId == null) {
             this.hubInventoryId = UUID.randomUUID();
         }
-        if (this.createdAt == null) {
-            this.createdAt = OffsetDateTime.now();
-        }
     }
 
-    public void updateQuantity(Integer quantity, UUID updatedBy) {
+    public void updateQuantity(Integer quantity, String updatedBy) {
         validateNonNegativeQuantity(quantity);
 
         this.quantity = quantity;
-        this.updatedAt = OffsetDateTime.now();
         this.updatedBy = updatedBy;
     }
 
-    public void decrease(Integer quantity, UUID updatedBy) {
+    public void decrease(Integer quantity, String updatedBy) {
         validatePositiveQuantity(quantity);
 
         if (this.quantity < quantity) {
@@ -118,21 +91,18 @@ public class HubInventory {
         }
 
         this.quantity -= quantity;
-        this.updatedAt = OffsetDateTime.now();
         this.updatedBy = updatedBy;
     }
 
-    public void restore(Integer quantity, UUID updatedBy) {
+    public void restoreQuantity(Integer quantity, String restoredBy) {
         validatePositiveQuantity(quantity);
 
         this.quantity += quantity;
-        this.updatedAt = OffsetDateTime.now();
-        this.updatedBy = updatedBy;
+        this.updatedBy = restoredBy;
     }
 
-    public void softDelete(UUID deletedBy) {
-        this.deletedAt = OffsetDateTime.now();
-        this.deletedBy = deletedBy;
+    public void softDelete(String deletedBy) {
+        delete(deletedBy);
     }
 
     private static void validateRequiredIds(UUID hubId, UUID companyId, UUID productId) {

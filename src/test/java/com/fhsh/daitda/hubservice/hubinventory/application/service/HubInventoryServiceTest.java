@@ -1,5 +1,7 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
+import com.fhsh.daitda.exception.BusinessException;
+import com.fhsh.daitda.exception.ErrorCode;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +38,7 @@ public class HubInventoryServiceTest {
     private static final UUID COMPANY_ID = UUID.randomUUID();
     private static final UUID PRODUCT_ID = UUID.randomUUID();
     private static final UUID HUB_INVENTORY_ID = UUID.randomUUID();
-    private static final UUID USER_ID = UUID.randomUUID();
+    private static final String USER_ID = "test-user";
 
     @Test
     @DisplayName("허브 재고 생성 성공")
@@ -56,6 +59,7 @@ public class HubInventoryServiceTest {
                     HubInventory inventory = invocationOnMock.getArgument(0);
                     ReflectionTestUtils.invokeMethod(inventory, "prePersist");
                     ReflectionTestUtils.setField(inventory, "hubInventoryId", HUB_INVENTORY_ID);
+                    ReflectionTestUtils.setField(inventory,"createdAt", LocalDateTime.now());
                     return inventory;
                 });
 
@@ -90,8 +94,9 @@ public class HubInventoryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 등록된 허브 재고입니다.");
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.CONFLICT);
 
         verify(hubInventoryRepository, never()).saveAndFlush(any(HubInventory.class));
     }
@@ -135,8 +140,9 @@ public class HubInventoryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 등록된 허브 재고입니다.");
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.CONFLICT);
     }
 
     private HubInventory 생성된재고(int quantity) {

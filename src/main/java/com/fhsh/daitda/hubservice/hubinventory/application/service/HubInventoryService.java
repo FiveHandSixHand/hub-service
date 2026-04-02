@@ -1,5 +1,7 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
+import com.fhsh.daitda.exception.BusinessException;
+import com.fhsh.daitda.exception.ErrorCode;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
@@ -8,9 +10,9 @@ import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInvento
 import com.fhsh.daitda.hubservice.hubinventory.application.result.ListHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.repository.HubInventoryRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +29,7 @@ public class HubInventoryService {
 
     // 재고생성
     @Transactional
-    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, UUID createdBy) {
+    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, String createdBy) {
         validateDuplicateHubInventory(command.getHubId(), command.getCompanyId(), command.getProductId());
 
         HubInventory hubInventory = HubInventory.create(
@@ -42,7 +44,7 @@ public class HubInventoryService {
             HubInventory savedHubInventory = hubInventoryRepository.saveAndFlush(hubInventory);
             return FindHubInventoryResult.from(savedHubInventory);
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("이미 등록된 허브 재고입니다.");
+            throw new BusinessException(ErrorCode.CONFLICT);
         }
     }
 
@@ -72,14 +74,18 @@ public class HubInventoryService {
     public FindHubInventoryResult searchHubInventory(UUID hubId, UUID companyId, UUID productId) {
         HubInventory hubInventory = hubInventoryRepository
                 .findByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(hubId, companyId, productId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 허브 재고를 찾을 수 없습니다."));
+                /*
+                 * common ErrorCode에서 404에 가장 가까운 건 INVALID_PATH라 임시 사용
+                 * 나중에 RESOURCE_NOT_FOUND류가 common에 추가?
+                 */
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_PATH));
 
         return FindHubInventoryResult.from(hubInventory);
     }
 
     // 재고 수량 수정
     @Transactional
-    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, String updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
 
         hubInventory.updateQuantity(command.getQuantity(), updatedBy);
@@ -89,7 +95,7 @@ public class HubInventoryService {
 
     // 재고 차감
     @Transactional
-    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, String updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
         hubInventory.decrease(command.getQuantity(), updatedBy);
@@ -99,17 +105,17 @@ public class HubInventoryService {
 
     // 재고 복원
     @Transactional
-    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, UUID updatedBy) {
+    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, String updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
-        hubInventory.restore(command.getQuantity(), updatedBy);
+        hubInventory.restoreQuantity(command.getQuantity(), updatedBy);
 
         return FindHubInventoryResult.from(hubInventory);
     }
 
     // 논리 삭제
     @Transactional
-    public void deleteHubInventory(UUID hubInventoryId, UUID deletedBy) {
+    public void deleteHubInventory(UUID hubInventoryId, String deletedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
         hubInventory.softDelete(deletedBy);
     }
@@ -119,13 +125,17 @@ public class HubInventoryService {
         boolean exists = hubInventoryRepository.existsByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(hubId, companyId, productId);
 
         if (exists) {
-            throw new IllegalArgumentException("이미 등록된 허브 재고입니다.");
+            throw new BusinessException(ErrorCode.CONFLICT);
         }
     }
 
     // 삭제 안 된 재고 row만 찾기
     private HubInventory findActiveHubInventory(UUID hubInventoryId) {
         return hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(hubInventoryId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 허브 재고를 찾을 수 없습니다."));
+                /*
+                 * common ErrorCode에서 404에 가장 가까운 건 INVALID_PATH라 임시 사용(not found 에러x)
+                 * 나중에 RESOURCE_NOT_FOUND류가 common에 추가?
+                 */
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_PATH));
     }
 }

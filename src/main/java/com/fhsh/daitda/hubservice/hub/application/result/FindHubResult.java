@@ -3,7 +3,7 @@ package com.fhsh.daitda.hubservice.hub.application.result;
 import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record FindHubResult(
@@ -13,8 +13,8 @@ public record FindHubResult(
         BigDecimal latitude,
         BigDecimal longitude,
         boolean isCentral,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static FindHubResult from(Hub hub) {
         return new FindHubResult(

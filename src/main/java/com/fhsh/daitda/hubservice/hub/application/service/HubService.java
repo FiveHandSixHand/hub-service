@@ -1,5 +1,7 @@
 package com.fhsh.daitda.hubservice.hub.application.service;
 
+import com.fhsh.daitda.exception.BusinessException;
+import com.fhsh.daitda.exception.ErrorCode;
 import com.fhsh.daitda.hubservice.hub.application.command.CreateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.command.UpdateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
@@ -23,7 +25,7 @@ public class HubService {
     }
 
     @Transactional
-    public FindHubResult createHub(CreateHubCommand command, UUID createdBy) {
+    public FindHubResult createHub(CreateHubCommand command, String createdBy) {
         Hub hub = Hub.create(
                 command.getHubName(),
                 command.getHubAddress(),
@@ -50,7 +52,7 @@ public class HubService {
     }
 
     @Transactional
-    public FindHubResult updateHub(UUID hubId, UpdateHubCommand command, UUID updatedBy) {
+    public FindHubResult updateHub(UUID hubId, UpdateHubCommand command, String updatedBy) {
         Hub hub = findActiveHub(hubId);
 
         hub.update(
@@ -65,13 +67,18 @@ public class HubService {
     }
 
     @Transactional
-    public void deleteHub(UUID hubId, UUID deletedBy) {
+    public void deleteHub(UUID hubId, String deletedBy) {
         Hub hub = findActiveHub(hubId);
         hub.softDelete(deletedBy);
     }
 
+
+    /*
+    * common ErrorCode에서 404에 가장 가까운 건 INVALID_PATH라 임시 사용
+    * 나중에 RESOURCE_NOT_FOUND류가 common에 추가?
+    */
     private Hub findActiveHub(UUID hubId) {
         return hubRepository.findByHubIdAndDeletedAtIsNull(hubId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 허브를 찾을 수 없습니다. hubId=" + hubId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_PATH));
     }
 }
