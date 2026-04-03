@@ -10,7 +10,6 @@ import java.util.UUID;
 @Builder
 public class UpdateHubRouteCommand {
 
-    private UUID hubRouteId;
     private Integer durationTime;
     private BigDecimal distance;
 }
