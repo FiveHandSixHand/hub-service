@@ -7,7 +7,3 @@ logging:
     org.hibernate.SQL: DEBUG
     com.fhsh.daitda: DEBUG
 
-naver:
-  map:
-    client-id: ${NAVER_MAP_CLIENT_ID:}
-    client-secret: ${NAVER_MAP_CLIENT_SECRET:}
