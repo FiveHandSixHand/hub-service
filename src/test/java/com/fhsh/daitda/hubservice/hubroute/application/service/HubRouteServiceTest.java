@@ -8,6 +8,7 @@ import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -142,8 +144,8 @@ public class HubRouteServiceTest {
     }
 
     @Test
-    @DisplayName("DB 유니크 제약 위반 시 중복 예외를 반환한다")
-    void 허브경로생성_DB제약위반실패() {
+    @DisplayName("유니크 제약 위반 시 중복 예외를 반환한다")
+    void 허브경로생성_유니크제약위반실패() {
         // given
         CreateHubRouteCommand command = CreateHubRouteCommand.builder()
                 .srcHubId(SRC_HUB_ID)
@@ -158,8 +160,16 @@ public class HubRouteServiceTest {
                 .thenReturn(Optional.of(생성된허브(DEST_HUB_ID)));
         when(hubRouteRepository.existsBySrcHubIdAndDestHubIdAndDeletedAtIsNull(SRC_HUB_ID, DEST_HUB_ID))
                 .thenReturn(false);
+
+        ConstraintViolationException constraintViolationException =
+                new ConstraintViolationException(
+                        "unique constraint violation",
+                        new SQLException("duplicate key"),
+                        "uk_hub_route_src_dest"
+                );
+
         when(hubRouteRepository.saveAndFlush(any(HubRoute.class)))
-                .thenThrow(new DataIntegrityViolationException("고유 제약 조건 위반"));
+                .thenThrow(new DataIntegrityViolationException("DB 제약 조건 위반", constraintViolationException));
 
         // when & then
         assertThatThrownBy(() -> hubRouteService.createHubRoute(command, USER_ID))
@@ -167,6 +177,7 @@ public class HubRouteServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
     }
+
     private Hub 생성된허브(UUID hubId) {
         Hub hub = Hub.create(
                 "테스트 허브",
