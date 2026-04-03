@@ -10,7 +10,7 @@ public record FindHubRouteResponse(
         UUID hubRouteId,
         UUID srcHubId,
         UUID destHubId,
-        Integer durationTIme,
+        Integer durationTime,
         BigDecimal distance,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
