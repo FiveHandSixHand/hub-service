@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "p_hub_route", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_hub_route_src_dest", columnNames = {"src_hub_id", "dext_hub_id"})
+        @UniqueConstraint(name = "uk_hub_route_src_dest", columnNames = {"src_hub_id", "dest_hub_id"})
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HubRoute extends BaseUserEntity {
