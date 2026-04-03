@@ -1,4 +1,4 @@
-package com.fhsh.daitda.hubservice.hubroute.doamin.entity;
+package com.fhsh.daitda.hubservice.hubroute.domain.entity;
 
 import com.fhsh.daitda.domain.BaseUserEntity;
 import jakarta.persistence.*;

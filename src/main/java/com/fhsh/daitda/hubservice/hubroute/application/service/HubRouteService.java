@@ -8,9 +8,9 @@ import com.fhsh.daitda.hubservice.hubroute.application.command.CreateHubRouteCom
 import com.fhsh.daitda.hubservice.hubroute.application.command.UpdateHubRouteCommand;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult;
-import com.fhsh.daitda.hubservice.hubroute.doamin.entity.HubRoute;
-import com.fhsh.daitda.hubservice.hubroute.doamin.exception.HubRouteErrorCode;
-import com.fhsh.daitda.hubservice.hubroute.doamin.repository.HubRouteRepository;
+import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
+import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
+import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

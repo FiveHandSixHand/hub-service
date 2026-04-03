@@ -1,4 +1,4 @@
-package com.fhsh.daitda.hubservice.hubroute.doamin.exception;
+package com.fhsh.daitda.hubservice.hubroute.domain.exception;
 
 import com.fhsh.daitda.exception.ErrorCode;
 import lombok.Getter;

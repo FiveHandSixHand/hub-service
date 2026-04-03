@@ -1,6 +1,6 @@
 package com.fhsh.daitda.hubservice.hubroute.application.result;
 
-import com.fhsh.daitda.hubservice.hubroute.doamin.entity.HubRoute;
+import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

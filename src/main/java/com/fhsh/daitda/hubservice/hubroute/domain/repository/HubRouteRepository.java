@@ -1,6 +1,6 @@
-package com.fhsh.daitda.hubservice.hubroute.doamin.repository;
+package com.fhsh.daitda.hubservice.hubroute.domain.repository;
 
-import com.fhsh.daitda.hubservice.hubroute.doamin.entity.HubRoute;
+import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
