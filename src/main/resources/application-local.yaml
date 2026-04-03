@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    password: ${DB_PASSWORD}
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    com.fhsh.daitda: DEBUG
+
