@@ -1,11 +1,11 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
 import com.fhsh.daitda.exception.BusinessException;
-import com.fhsh.daitda.exception.ErrorCode;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
+import com.fhsh.daitda.hubservice.hubinventory.domain.exception.HubInventoryErrorCode;
 import com.fhsh.daitda.hubservice.hubinventory.domain.repository.HubInventoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -96,7 +96,7 @@ public class HubInventoryServiceTest {
         assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(ErrorCode.CONFLICT);
+                .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
 
         verify(hubInventoryRepository, never()).saveAndFlush(any(HubInventory.class));
     }
@@ -142,7 +142,7 @@ public class HubInventoryServiceTest {
         assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(ErrorCode.CONFLICT);
+                .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
     }
 
     private HubInventory 생성된재고(int quantity) {
