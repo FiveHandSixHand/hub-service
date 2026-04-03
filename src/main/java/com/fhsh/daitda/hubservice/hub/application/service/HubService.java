@@ -1,12 +1,12 @@
 package com.fhsh.daitda.hubservice.hub.application.service;
 
 import com.fhsh.daitda.exception.BusinessException;
-import com.fhsh.daitda.exception.ErrorCode;
 import com.fhsh.daitda.hubservice.hub.application.command.CreateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.command.UpdateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
 import com.fhsh.daitda.hubservice.hub.application.result.ListHubResult;
 import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
+import com.fhsh.daitda.hubservice.hub.domain.exception.HubErrorCode;
 import com.fhsh.daitda.hubservice.hub.domain.repository.HubRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,13 +72,8 @@ public class HubService {
         hub.softDelete(deletedBy);
     }
 
-
-    /*
-    * common ErrorCode에서 404에 가장 가까운 건 INVALID_PATH라 임시 사용
-    * 나중에 RESOURCE_NOT_FOUND류가 common에 추가?
-    */
     private Hub findActiveHub(UUID hubId) {
         return hubRepository.findByHubIdAndDeletedAtIsNull(hubId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_PATH));
+                .orElseThrow(() -> new BusinessException(HubErrorCode.HUB_NOT_FOUND));
     }
 }
