@@ -67,4 +67,5 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+    systemProperty 'spring.config.name', 'application-test'
 }
