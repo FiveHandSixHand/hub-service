@@ -11,6 +11,7 @@ import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,9 +49,25 @@ public class HubRouteService {
             HubRoute savedHubRoute = hubRouteRepository.saveAndFlush(hubRoute);
             return FindHubRouteResult.from(savedHubRoute);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
+            if (isUniqueConstraintViolation(e)) {
+                throw new BusinessException(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
+            }
+            throw e;
         }
     }
+
+    private boolean isUniqueConstraintViolation(DataIntegrityViolationException e) {
+        Throwable cause = e.getCause();
+
+        while (cause != null) {
+            if (cause instanceof ConstraintViolationException constraintViolationException) {
+                return "uk_hub_route_src_dest".equals(constraintViolationException.getConstraintName());
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
 
     public List<ListHubRouteResult> getHubRoutes() {
         return hubRouteRepository.findAllByDeletedAtIsNull()
