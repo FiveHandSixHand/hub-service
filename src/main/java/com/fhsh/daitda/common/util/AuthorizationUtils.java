@@ -14,7 +14,7 @@ public final class AuthorizationUtils {
             throw new ForbiddenException("권한 정보가 존재하지 않습니다.");
         }
 
-        if (!(authenticatedUser.isAdmin() || authenticatedUser.isHubAdmin())) {
+        if (!authenticatedUser.isAdmin()) {
             throw new ForbiddenException("해당 요청에 대한 권한이 없습니다.");
         }
     }
