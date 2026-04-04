@@ -31,9 +31,9 @@ public class HubInventoryController {
     // 재고 생성
     @PostMapping
     public ResponseEntity<FindHubInventoryResponse> createHubInventory(@Valid @RequestBody CreateHubInventoryRequest request,
-                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
-                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
-                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
@@ -85,9 +85,9 @@ public class HubInventoryController {
     @PatchMapping("/{hubInventoryId}")
     public ResponseEntity<FindHubInventoryResponse> updateHubInventory(@PathVariable UUID hubInventoryId,
                                                                        @Valid @RequestBody UpdateHubInventoryRequest request,
-                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
-                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
-                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
@@ -104,9 +104,9 @@ public class HubInventoryController {
     // 재고 논리 삭제
     @DeleteMapping("/{hubInventoryId}")
     public ResponseEntity<Void> deleteHubInventory(@PathVariable UUID hubInventoryId,
-                                                   @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
-                                                   @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
-                                                   @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+                                                   @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
+                                                   @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
+                                                   @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         hubInventoryService.deleteHubInventory(hubInventoryId, authenticatedUser.userId());

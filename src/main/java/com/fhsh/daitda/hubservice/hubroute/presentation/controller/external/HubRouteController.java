@@ -30,9 +30,9 @@ public class HubRouteController {
      */
     @PostMapping
     public FindHubRouteResponse createHubRoute(@Valid @RequestBody CreateHubRouteRequest request,
-                                               @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
-                                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
-                                               @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
@@ -79,9 +79,9 @@ public class HubRouteController {
     @PatchMapping("/{hubRouteId}")
     public FindHubRouteResponse updateHubRoute(@PathVariable UUID hubRouteId,
                                                @Valid @RequestBody UpdateHubRouteRequest request,
-                                               @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
-                                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
-                                               @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
@@ -95,9 +95,9 @@ public class HubRouteController {
      */
     @DeleteMapping("/{hubRouteId}")
     public void deleteHubRoute(@PathVariable UUID hubRouteId,
-                               @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
-                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
-                               @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+                               @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
+                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
+                               @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
