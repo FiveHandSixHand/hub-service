@@ -2,9 +2,11 @@ package com.fhsh.daitda.hubservice.hub.presentation.controller.external;
 
 import com.fhsh.daitda.common.config.security.SecurityHeaderConstants;
 import com.fhsh.daitda.common.model.AuthenticatedUser;
+import com.fhsh.daitda.common.util.AuthorizationUtils;
 import com.fhsh.daitda.hubservice.hub.application.command.CreateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.command.UpdateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
+import com.fhsh.daitda.hubservice.hub.application.result.ListHubResult;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.request.HubCreateRequest;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.request.HubUpdateRequest;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.response.HubResponse;
@@ -31,6 +33,7 @@ public class HubController {
     /**
      * 허브를 생성
      * 외부 요청은 Gateway를 통해 진입하므로 사용자 헤더를 받아 createdBy에 반영
+     * 명세상 MASTER 권한이 필요한 API이므로 ADMIN 권한으로 매핑하여 검증
      */
     @PostMapping
     public ResponseEntity<HubResponse> createHub(
@@ -40,7 +43,7 @@ public class HubController {
             @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role
     ) {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
-
+        AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
         CreateHubCommand command = CreateHubCommand.builder()
                 .hubName(request.getHubName())
@@ -56,9 +59,21 @@ public class HubController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * 전체 허브 목록을 조회
+     * 명세상 ALL 권한 API이므로 인증된 사용자 역할이면 모두 허용
+     */
     @GetMapping
-    public ResponseEntity<List<ListHubResponse>> getHubs() {
-        List<ListHubResponse> responses = hubService.getHubs()
+    public ResponseEntity<List<ListHubResponse>> getHubs(@RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                                         @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                                         @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+        AuthorizationUtils.validateAllAccess(authenticatedUser);
+
+        List<ListHubResult> results = hubService.getHubs();
+
+        List<ListHubResponse> responses = results
                 .stream()
                 .map(hub -> ListHubResponse.from(hub))
                 .toList();
@@ -66,14 +81,29 @@ public class HubController {
         return ResponseEntity.ok(responses);
     }
 
+    /**
+     * 허브 ID 기준으로 단건 허브를 조회
+     * 명세상 ALL 권한 API이므로 인증된 사용자 역할이면 모두 허용
+     */
     @GetMapping("/{hubId}")
-    public ResponseEntity<HubResponse> getHub(@PathVariable UUID hubId) {
+    public ResponseEntity<HubResponse> getHub(@PathVariable UUID hubId,
+                                              @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                              @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                              @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+        AuthorizationUtils.validateAllAccess(authenticatedUser);
+
         FindHubResult result = hubService.getHub(hubId);
         HubResponse response = HubResponse.from(result);
 
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 허브 정보를 수정
+     * 명세상 MASTER 권한이 필요한 API이므로 ADMIN 권한으로 매핑하여 검증
+     */
     @PatchMapping("/{hubId}")
     public ResponseEntity<HubResponse> updateHub(@PathVariable UUID hubId,
                                                  @Valid @RequestBody HubUpdateRequest request,
@@ -82,6 +112,7 @@ public class HubController {
                                                  @RequestHeader(SecurityHeaderConstants.USER_ROLE)String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+        AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
         UpdateHubCommand command = UpdateHubCommand.builder()
                 .hubName(request.getHubName())
@@ -97,6 +128,10 @@ public class HubController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 허브를 논리 삭제
+     * 명세상 MASTER 권한이 필요한 API이므로 ADMIN 권한으로 매핑하여 검증
+     */
     @DeleteMapping("/{hubId}")
     public ResponseEntity<Void> deleteHub(@PathVariable UUID hubId,
                                           @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
@@ -104,6 +139,7 @@ public class HubController {
                                           @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+        AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
         hubService.deleteHub(hubId, authenticatedUser.userId());
         return ResponseEntity.noContent().build();
