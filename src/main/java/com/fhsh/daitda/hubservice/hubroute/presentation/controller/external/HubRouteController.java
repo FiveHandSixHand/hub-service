@@ -1,5 +1,7 @@
 package com.fhsh.daitda.hubservice.hubroute.presentation.controller.external;
 
+import com.fhsh.daitda.common.config.security.SecurityHeaderConstants;
+import com.fhsh.daitda.common.model.AuthenticatedUser;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.service.HubRouteService;
@@ -27,8 +29,14 @@ public class HubRouteController {
      * 출발 허브와 도착 허브 기준의 허브 경로 생성
      */
     @PostMapping
-    public FindHubRouteResponse createHubRoute(@Valid @RequestBody CreateHubRouteRequest request) {
-        FindHubRouteResult result = hubRouteService.createHubRoute(request.toCommand(), null);
+    public FindHubRouteResponse createHubRoute(@Valid @RequestBody CreateHubRouteRequest request,
+                                               @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                               @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
+        FindHubRouteResult result = hubRouteService.createHubRoute(request.toCommand(), authenticatedUser.userId());
         return FindHubRouteResponse.from(result);
     }
 
@@ -69,11 +77,15 @@ public class HubRouteController {
      * 허브 경로의 소요 시간과 이동 거리 수정
      */
     @PatchMapping("/{hubRouteId}")
-    public FindHubRouteResponse updateHubRoute(
-            @PathVariable UUID hubRouteId,
-            @Valid @RequestBody UpdateHubRouteRequest request
-    ) {
-        FindHubRouteResult result = hubRouteService.updateHubRoute(hubRouteId, request.toCommand(), null);
+    public FindHubRouteResponse updateHubRoute(@PathVariable UUID hubRouteId,
+                                               @Valid @RequestBody UpdateHubRouteRequest request,
+                                               @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                               @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
+        FindHubRouteResult result = hubRouteService.updateHubRoute(hubRouteId, request.toCommand(), authenticatedUser.userId());
         return FindHubRouteResponse.from(result);
     }
 
@@ -82,7 +94,13 @@ public class HubRouteController {
      * 지금은 삭제 성공 여부만 의미가 있어 별도 응답 본문 없이 void로 처리
      */
     @DeleteMapping("/{hubRouteId}")
-    public void deleteHubRoute(@PathVariable UUID hubRouteId) {
-        hubRouteService.deleteHubRoute(hubRouteId, null);
+    public void deleteHubRoute(@PathVariable UUID hubRouteId,
+                               @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                               @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                               @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
+        hubRouteService.deleteHubRoute(hubRouteId, authenticatedUser.userId());
     }
 }

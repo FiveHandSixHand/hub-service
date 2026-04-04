@@ -1,5 +1,7 @@
-package com.fhsh.daitda.hubservice.hub.presentation.controller;
+package com.fhsh.daitda.hubservice.hub.presentation.controller.external;
 
+import com.fhsh.daitda.common.config.security.SecurityHeaderConstants;
+import com.fhsh.daitda.common.model.AuthenticatedUser;
 import com.fhsh.daitda.hubservice.hub.application.command.CreateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.command.UpdateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
@@ -26,8 +28,20 @@ public class HubController {
         this.hubService = hubService;
     }
 
+    /**
+     * 허브를 생성
+     * 외부 요청은 Gateway를 통해 진입하므로 사용자 헤더를 받아 createdBy에 반영
+     */
     @PostMapping
-    public ResponseEntity<HubResponse> createHub(@Valid @RequestBody HubCreateRequest request) {
+    public ResponseEntity<HubResponse> createHub(
+            @Valid @RequestBody HubCreateRequest request,
+            @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+            @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+            @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role
+    ) {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
+
         CreateHubCommand command = CreateHubCommand.builder()
                 .hubName(request.getHubName())
                 .hubAddress(request.getHubAddress())
@@ -36,7 +50,7 @@ public class HubController {
                 .isCentral(request.getIsCentral())
                 .build();
 
-        FindHubResult result = hubService.createHub(command, null);
+        FindHubResult result = hubService.createHub(command, authenticatedUser.userId());
         HubResponse response = HubResponse.from(result);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -62,7 +76,13 @@ public class HubController {
 
     @PatchMapping("/{hubId}")
     public ResponseEntity<HubResponse> updateHub(@PathVariable UUID hubId,
-                                                 @Valid @RequestBody HubUpdateRequest request) {
+                                                 @Valid @RequestBody HubUpdateRequest request,
+                                                 @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                                 @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                                 @RequestHeader(SecurityHeaderConstants.USER_ROLE)String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
         UpdateHubCommand command = UpdateHubCommand.builder()
                 .hubName(request.getHubName())
                 .hubAddress(request.getHubAddress())
@@ -71,15 +91,21 @@ public class HubController {
                 .isCentral(request.getIsCentral())
                 .build();
 
-        FindHubResult result = hubService.updateHub(hubId, command, null);
+        FindHubResult result = hubService.updateHub(hubId, command, authenticatedUser.userId());
         HubResponse response = HubResponse.from(result);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{hubId}")
-    public ResponseEntity<Void> deleteHub(@PathVariable UUID hubId) {
-        hubService.deleteHub(hubId, null);
+    public ResponseEntity<Void> deleteHub(@PathVariable UUID hubId,
+                                          @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                          @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                          @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
+        hubService.deleteHub(hubId, authenticatedUser.userId());
         return ResponseEntity.noContent().build();
     }
 }
