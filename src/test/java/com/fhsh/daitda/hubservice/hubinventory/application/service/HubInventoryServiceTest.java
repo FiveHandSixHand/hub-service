@@ -4,6 +4,7 @@ import com.fhsh.daitda.exception.BusinessException;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
+import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.exception.HubInventoryErrorCode;
 import com.fhsh.daitda.hubservice.hubinventory.domain.repository.HubInventoryRepository;
@@ -32,7 +33,7 @@ public class HubInventoryServiceTest {
     private HubInventoryRepository hubInventoryRepository;
 
     @InjectMocks
-    private HubInventoryService hubInventoryService;
+    private HubInventoryCommandService hubInventoryCommandService;
 
     private static final UUID HUB_ID = UUID.randomUUID();
     private static final UUID COMPANY_ID = UUID.randomUUID();
@@ -64,7 +65,7 @@ public class HubInventoryServiceTest {
                 });
 
         // when
-        FindHubInventoryResult result = hubInventoryService.createHubInventory(command, USER_ID);
+        FindHubInventoryResult result = hubInventoryCommandService.createHubInventory(command, USER_ID);
 
         // then
         assertThat(result.hubInventoryId()).isEqualTo(HUB_INVENTORY_ID);
@@ -93,7 +94,7 @@ public class HubInventoryServiceTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
+        assertThatThrownBy(() -> hubInventoryCommandService.createHubInventory(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
@@ -116,7 +117,7 @@ public class HubInventoryServiceTest {
                 .thenReturn(Optional.of(hubInventory));
 
         // when & then
-        assertThatThrownBy(() -> hubInventoryService.decreaseHubInventory(command, USER_ID))
+        assertThatThrownBy(() -> hubInventoryCommandService.decreaseHubInventory(command, USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("재고가 부족합니다.");
     }
@@ -139,7 +140,7 @@ public class HubInventoryServiceTest {
                 .thenThrow(new DataIntegrityViolationException("고유 제약 조건 위반"));
 
         // when & then
-        assertThatThrownBy(() -> hubInventoryService.createHubInventory(command, USER_ID))
+        assertThatThrownBy(() -> hubInventoryCommandService.createHubInventory(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
