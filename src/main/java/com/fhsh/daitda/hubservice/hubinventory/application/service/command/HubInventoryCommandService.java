@@ -1,0 +1,101 @@
+package com.fhsh.daitda.hubservice.hubinventory.application.service.command;
+
+import com.fhsh.daitda.exception.BusinessException;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.UpdateHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
+import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
+import com.fhsh.daitda.hubservice.hubinventory.domain.exception.HubInventoryErrorCode;
+import com.fhsh.daitda.hubservice.hubinventory.domain.repository.HubInventoryRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+// 허브 재고 도메인의 쓰기 작업(Create /Update/Delete)을 담당
+@Service
+@Transactional
+public class HubInventoryCommandService {
+
+    private final HubInventoryRepository hubInventoryRepository;
+
+    public HubInventoryCommandService(HubInventoryRepository hubInventoryRepository) {
+        this.hubInventoryRepository = hubInventoryRepository;
+    }
+
+    // 재고생성
+    @Transactional
+    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, String createdBy) {
+        validateDuplicateHubInventory(command.getHubId(), command.getCompanyId(), command.getProductId());
+
+        HubInventory hubInventory = HubInventory.create(
+                command.getHubId(),
+                command.getCompanyId(),
+                command.getProductId(),
+                command.getQuantity(),
+                createdBy
+        );
+
+        try {
+            HubInventory savedHubInventory = hubInventoryRepository.saveAndFlush(hubInventory);
+            return FindHubInventoryResult.from(savedHubInventory);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
+        }
+    }
+
+    // 재고 수량 수정
+    @Transactional
+    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, String updatedBy) {
+        HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
+
+        hubInventory.updateQuantity(command.getQuantity(), updatedBy);
+
+        return FindHubInventoryResult.from(hubInventory);
+    }
+
+    // 재고 차감
+    @Transactional
+    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, String updatedBy) {
+        HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
+
+        hubInventory.decrease(command.getQuantity(), updatedBy);
+
+        return FindHubInventoryResult.from(hubInventory);
+    }
+
+    // 재고 복원
+    @Transactional
+    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, String updatedBy) {
+        HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
+
+        hubInventory.restoreQuantity(command.getQuantity(), updatedBy);
+
+        return FindHubInventoryResult.from(hubInventory);
+    }
+
+    // 논리 삭제
+    @Transactional
+    public void deleteHubInventory(UUID hubInventoryId, String deletedBy) {
+        HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
+        hubInventory.softDelete(deletedBy);
+    }
+
+    // 중복 체크
+    private void validateDuplicateHubInventory(UUID hubId, UUID companyId, UUID productId) {
+        boolean exists = hubInventoryRepository.existsByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(hubId, companyId, productId);
+
+        if (exists) {
+            throw new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
+        }
+    }
+
+    // 삭제 안 된 재고 row만 찾기
+    private HubInventory findActiveHubInventory(UUID hubInventoryId) {
+        return hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(hubInventoryId)
+                .orElseThrow(() -> new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND));
+    }
+}
