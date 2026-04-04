@@ -28,4 +28,12 @@ public enum UserRole {
     public boolean isHubAdmin() {
         return this == HUB_ADMIN;
     }
+
+    public boolean isDelivery() {
+        return this == DELIVERY;
+    }
+
+    public boolean isCompany() {
+        return this == COMPANY;
+    }
 }
