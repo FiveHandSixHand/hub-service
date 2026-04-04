@@ -35,9 +35,9 @@ public class HubController {
     @PostMapping
     public ResponseEntity<HubResponse> createHub(
             @Valid @RequestBody HubCreateRequest request,
-            @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
-            @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
-            @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role
+            @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+            @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+            @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role
     ) {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
@@ -77,9 +77,9 @@ public class HubController {
     @PatchMapping("/{hubId}")
     public ResponseEntity<HubResponse> updateHub(@PathVariable UUID hubId,
                                                  @Valid @RequestBody HubUpdateRequest request,
-                                                 @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
-                                                 @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
-                                                 @RequestHeader(value = SecurityHeaderConstants.USER_ROLE)String role)
+                                                 @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                                 @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                                 @RequestHeader(SecurityHeaderConstants.USER_ROLE)String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
@@ -99,9 +99,9 @@ public class HubController {
 
     @DeleteMapping("/{hubId}")
     public ResponseEntity<Void> deleteHub(@PathVariable UUID hubId,
-                                          @RequestHeader(value = SecurityHeaderConstants.USER_ID) String userId,
-                                          @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL) String email,
-                                          @RequestHeader(value = SecurityHeaderConstants.USER_ROLE) String role)
+                                          @RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
+                                          @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                          @RequestHeader(SecurityHeaderConstants.USER_ROLE) String role)
     {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
