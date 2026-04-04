@@ -1,5 +1,7 @@
-package com.fhsh.daitda.hubservice.hubinventory.presentation.controller;
+package com.fhsh.daitda.hubservice.hubinventory.presentation.controller.external;
 
+import com.fhsh.daitda.common.config.security.SecurityHeaderConstants;
+import com.fhsh.daitda.common.model.AuthenticatedUser;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.UpdateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
@@ -28,7 +30,12 @@ public class HubInventoryController {
 
     // 재고 생성
     @PostMapping
-    public ResponseEntity<FindHubInventoryResponse> createHubInventory(@Valid @RequestBody CreateHubInventoryRequest request) {
+    public ResponseEntity<FindHubInventoryResponse> createHubInventory(@Valid @RequestBody CreateHubInventoryRequest request,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
 
         CreateHubInventoryCommand command = CreateHubInventoryCommand.builder()
                 .hubId(request.getHubId())
@@ -37,7 +44,7 @@ public class HubInventoryController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResult result = hubInventoryService.createHubInventory(command, null);
+        FindHubInventoryResult result = hubInventoryService.createHubInventory(command, authenticatedUser.userId());
         FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -77,12 +84,18 @@ public class HubInventoryController {
     // 재고 수량 직접 수정
     @PatchMapping("/{hubInventoryId}")
     public ResponseEntity<FindHubInventoryResponse> updateHubInventory(@PathVariable UUID hubInventoryId,
-                                                                       @Valid @RequestBody UpdateHubInventoryRequest request) {
+                                                                       @Valid @RequestBody UpdateHubInventoryRequest request,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                                                       @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+
         UpdateHubInventoryCommand command = UpdateHubInventoryCommand.builder()
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResult result = hubInventoryService.updateHubInventory(hubInventoryId, command, null);
+        FindHubInventoryResult result = hubInventoryService.updateHubInventory(hubInventoryId, command, authenticatedUser.userId());
         FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
 
         return ResponseEntity.ok(response);
@@ -90,8 +103,13 @@ public class HubInventoryController {
 
     // 재고 논리 삭제
     @DeleteMapping("/{hubInventoryId}")
-    public ResponseEntity<Void> deleteHubInventory(@PathVariable UUID hubInventoryId) {
-        hubInventoryService.deleteHubInventory(hubInventoryId, null);
+    public ResponseEntity<Void> deleteHubInventory(@PathVariable UUID hubInventoryId,
+                                                   @RequestHeader(value = SecurityHeaderConstants.USER_ID, required = false) String userId,
+                                                   @RequestHeader(value = SecurityHeaderConstants.USER_EMAIL, required = false) String email,
+                                                   @RequestHeader(value = SecurityHeaderConstants.USER_ROLE, required = false) String role)
+    {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
+        hubInventoryService.deleteHubInventory(hubInventoryId, authenticatedUser.userId());
         return ResponseEntity.noContent().build();
     }
 }
