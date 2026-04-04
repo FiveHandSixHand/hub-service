@@ -6,6 +6,8 @@ import com.fhsh.daitda.common.util.AuthorizationUtils;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.service.HubRouteService;
+import com.fhsh.daitda.hubservice.hubroute.application.service.command.HubRouteCommandService;
+import com.fhsh.daitda.hubservice.hubroute.application.service.query.HubRouteQueryService;
 import com.fhsh.daitda.hubservice.hubroute.presentation.dto.request.CreateHubRouteRequest;
 import com.fhsh.daitda.hubservice.hubroute.presentation.dto.request.UpdateHubRouteRequest;
 import com.fhsh.daitda.hubservice.hubroute.presentation.dto.response.FindHubRouteResponse;
@@ -20,10 +22,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1/hub-routes")
 public class HubRouteController {
 
-    private final HubRouteService hubRouteService;
+    private final HubRouteCommandService hubRouteCommandService;
+    private final HubRouteQueryService hubRouteQueryService;
 
-    public HubRouteController(HubRouteService hubRouteService) {
-        this.hubRouteService = hubRouteService;
+    public HubRouteController(HubRouteCommandService hubRouteCommandService, HubRouteQueryService hubRouteQueryService) {
+        this.hubRouteCommandService = hubRouteCommandService;
+        this.hubRouteQueryService = hubRouteQueryService;
     }
 
     /**
@@ -39,7 +43,7 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        FindHubRouteResult result = hubRouteService.createHubRoute(request.toCommand(), authenticatedUser.userId());
+        FindHubRouteResult result = hubRouteCommandService.createHubRoute(request.toCommand(), authenticatedUser.userId());
         return FindHubRouteResponse.from(result);
     }
 
@@ -55,7 +59,7 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        List<ListHubRouteResult> results = hubRouteService.getHubRoutes();
+        List<ListHubRouteResult> results = hubRouteQueryService.getHubRoutes();
 
         return results.stream()
                 .map(result -> ListHubRouteResponse.from(result))
@@ -75,7 +79,7 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        FindHubRouteResult result = hubRouteService.getHubRoute(hubRouteId);
+        FindHubRouteResult result = hubRouteQueryService.getHubRoute(hubRouteId);
         return FindHubRouteResponse.from(result);
     }
 
@@ -93,7 +97,7 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        FindHubRouteResult result = hubRouteService.searchHubRoute(srcHubId, destHubId);
+        FindHubRouteResult result = hubRouteQueryService.searchHubRoute(srcHubId, destHubId);
         return FindHubRouteResponse.from(result);
     }
 
@@ -111,7 +115,7 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        FindHubRouteResult result = hubRouteService.updateHubRoute(hubRouteId, request.toCommand(), authenticatedUser.userId());
+        FindHubRouteResult result = hubRouteCommandService.updateHubRoute(hubRouteId, request.toCommand(), authenticatedUser.userId());
         return FindHubRouteResponse.from(result);
     }
 
@@ -129,6 +133,6 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        hubRouteService.deleteHubRoute(hubRouteId, authenticatedUser.userId());
+        hubRouteCommandService.deleteHubRoute(hubRouteId, authenticatedUser.userId());
     }
 }
