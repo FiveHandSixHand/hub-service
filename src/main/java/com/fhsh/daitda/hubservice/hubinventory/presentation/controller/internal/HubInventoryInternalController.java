@@ -1,4 +1,4 @@
-package com.fhsh.daitda.hubservice.hubinventory.presentation.controller;
+package com.fhsh.daitda.hubservice.hubinventory.presentation.controller.internal;
 
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
