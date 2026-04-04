@@ -5,7 +5,6 @@ import com.fhsh.daitda.common.model.AuthenticatedUser;
 import com.fhsh.daitda.common.util.AuthorizationUtils;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult;
-import com.fhsh.daitda.hubservice.hubroute.application.service.HubRouteService;
 import com.fhsh.daitda.hubservice.hubroute.application.service.command.HubRouteCommandService;
 import com.fhsh.daitda.hubservice.hubroute.application.service.query.HubRouteQueryService;
 import com.fhsh.daitda.hubservice.hubroute.presentation.dto.request.CreateHubRouteRequest;
