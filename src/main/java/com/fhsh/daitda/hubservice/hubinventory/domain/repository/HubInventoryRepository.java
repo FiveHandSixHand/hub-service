@@ -13,6 +13,8 @@ public interface HubInventoryRepository extends JpaRepository<HubInventory, UUID
 
     Optional<HubInventory> findByHubIdAndCompanyIdAndProductIdAndDeletedAtIsNull(UUID hubId, UUID companyId, UUID productId);
 
+    Optional<HubInventory> findByCompanyIdAndProductIdAndDeletedAtIsNull(UUID companyId, UUID productId);
+
     List<HubInventory> findAllByHubIdAndDeletedAtIsNull(UUID hubId);
 
     List<HubInventory> findAllByDeletedAtIsNull();
