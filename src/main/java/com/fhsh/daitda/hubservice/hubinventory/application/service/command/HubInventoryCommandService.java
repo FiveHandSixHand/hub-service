@@ -1,10 +1,7 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service.command;
 
 import com.fhsh.daitda.exception.BusinessException;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.UpdateHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.*;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.exception.HubInventoryErrorCode;
@@ -13,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 // 허브 재고 도메인의 쓰기 작업(Create /Update/Delete)을 담당
@@ -65,6 +63,16 @@ public class HubInventoryCommandService {
         hubInventory.decrease(command.getQuantity(), updatedBy);
 
         return FindHubInventoryResult.from(hubInventory);
+    }
+
+    public List<FindHubInventoryResult> decreaseHubInventories(DecreaseHubInventoriesCommand command, String updatedBy) {
+        return command.getItems().stream()
+                .map(item -> {
+                    HubInventory hubInventory = findActiveHubInventory(item.getHubInventoryId());
+                    hubInventory.decrease(item.getQuantity(), updatedBy);
+                    return FindHubInventoryResult.from(hubInventory);
+                })
+                .toList();
     }
 
     // 재고 복원
