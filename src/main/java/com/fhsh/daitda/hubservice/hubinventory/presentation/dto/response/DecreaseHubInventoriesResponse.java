@@ -18,7 +18,7 @@ public class DecreaseHubInventoriesResponse {
                 .items(results.stream()
                         .map(findHubInventoryResult -> Item.builder()
                                 .hubInventoryId(findHubInventoryResult.hubInventoryId())
-                                .hubInventoryId(findHubInventoryResult.hubId())
+                                .hubId(findHubInventoryResult.hubId())
                                 .companyId(findHubInventoryResult.companyId())
                                 .productId(findHubInventoryResult.productId())
                                 .quantity(findHubInventoryResult.quantity())
