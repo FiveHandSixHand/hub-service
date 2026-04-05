@@ -15,7 +15,7 @@ public class DecreaseHubInventoriesByProductResult {
 
     @Getter
     @Builder
-    private static class Item{
+    public static class Item{
         // 실제 차감에 사용한 재고 row PK
         private UUID hubInventoryId;
         // 어떤 상품에 대한 결과인지 식별하기 위해 포함
