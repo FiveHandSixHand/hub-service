@@ -84,7 +84,11 @@ public class HubRouteQueryService {
     private List<HubRoute> findRelayPath(UUID srcHubId, UUID destHubId) {
         List<HubRoute> routes = hubRouteRepository.findAllByDeletedAtIsNull();
 
-        Map<UUID, List<HubRoute>> graph = buildGraph(routes);
+        List<HubRoute> relayCandidates = routes.stream()
+                .filter(route -> !(route.getSrcHubId().equals(srcHubId) && route.getDestHubId().equals(destHubId)))
+                .toList();
+
+        Map<UUID, List<HubRoute>> graph = buildGraph(relayCandidates);
         Map<UUID, BigDecimal> distanceMap = new HashMap<>();
         Map<UUID, HubRoute> previousRouteMap = new HashMap<>();
 
