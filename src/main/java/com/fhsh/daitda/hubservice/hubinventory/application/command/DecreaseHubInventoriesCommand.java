@@ -14,7 +14,7 @@ public class DecreaseHubInventoriesCommand {
 
     @Getter
     @Builder
-    private static class Item{
+    public static class Item{
         private UUID hubInventoryId;
         private Integer quantity;
     }
