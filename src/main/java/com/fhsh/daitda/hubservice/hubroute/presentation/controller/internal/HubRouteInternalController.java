@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,5 +33,14 @@ public class HubRouteInternalController {
         return FindHubRouteResponse.from(result);
     }
 
+    @GetMapping("/path")
+    public List<FindHubRouteResponse> getHubRoutePath(@RequestParam UUID srcHubId,
+                                                      @RequestParam UUID destHubId)
+    {
+        List<FindHubRouteResult> results = hubRouteQueryService.getHubRoutePath(srcHubId, destHubId);
 
+        return results.stream()
+                .map(result -> FindHubRouteResponse.from(result))
+                .toList();
+    }
 }
