@@ -2,6 +2,7 @@ package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
 import com.fhsh.daitda.exception.BusinessException;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoriesCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
@@ -18,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -144,6 +146,48 @@ public class HubInventoryServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_CONFLICT);
+    }
+
+    @Test
+    @DisplayName("여러 재고를 한 번에 차감")
+    void 여러재고_일괄차감성공(){
+        // given
+        UUID HUB_INVENTORY_ID_1 = UUID.randomUUID();
+        UUID HUB_INVENTORY_ID_2 = UUID.randomUUID();
+
+        HubInventory inventory1 = HubInventory.create(HUB_ID, COMPANY_ID, PRODUCT_ID, 100, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory1, "prePersist");
+        ReflectionTestUtils.setField(inventory1, "hubInventoryId", HUB_INVENTORY_ID_1);
+
+        HubInventory inventory2 = HubInventory.create(HUB_ID, COMPANY_ID, UUID.randomUUID(), 50, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory2, "prePersist");
+        ReflectionTestUtils.setField(inventory2, "hubInventoryId", HUB_INVENTORY_ID_2);
+
+        DecreaseHubInventoriesCommand command = DecreaseHubInventoriesCommand.builder()
+                .items(List.of(
+                        DecreaseHubInventoriesCommand.Item.builder()
+                                .hubInventoryId(HUB_INVENTORY_ID_1)
+                                .quantity(10)
+                                .build(),
+                        DecreaseHubInventoriesCommand.Item.builder()
+                                .hubInventoryId(HUB_INVENTORY_ID_2)
+                                .quantity(5)
+                                .build()
+                ))
+                .build();
+
+        when(hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(HUB_INVENTORY_ID_1))
+                .thenReturn(Optional.of(inventory1));
+        when(hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(HUB_INVENTORY_ID_2))
+                .thenReturn(Optional.of(inventory2));
+
+        // when
+        List<FindHubInventoryResult> results = hubInventoryCommandService.decreaseHubInventories(command, USER_ID);
+
+        // then
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).quantity()).isEqualTo(90);
+        assertThat(results.get(1).quantity()).isEqualTo(45);
     }
 
     private HubInventory 생성된재고(int quantity) {
