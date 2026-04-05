@@ -2,6 +2,7 @@ package com.fhsh.daitda.hubservice.hubinventory.application.service.command;
 
 import com.fhsh.daitda.exception.BusinessException;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.*;
+import com.fhsh.daitda.hubservice.hubinventory.application.result.DecreaseHubInventoriesByProductResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.exception.HubInventoryErrorCode;
@@ -73,6 +74,34 @@ public class HubInventoryCommandService {
                     return FindHubInventoryResult.from(hubInventory);
                 })
                 .toList();
+    }
+
+    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProductResult(DecreaseHubInventoriesByProductCommand command, String updatedBy) {
+
+        List<DecreaseHubInventoriesByProductResult.Item> items = command.getOrderItems().stream()
+                .map(orderItem -> {
+                    // 회사 + 상품 기준으로 실제 재고 조회
+                    HubInventory hubInventory = hubInventoryRepository
+                            .findByCompanyIdAndProductIdAndDeletedAtIsNull(
+                                    command.getSupplierCompanyId(),
+                                    orderItem.getProductId()
+                            )
+                            .orElseThrow(() -> new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND));
+
+                    // 실제 재고 수량 차감
+                    hubInventory.decrease(orderItem.getQuantity(), updatedBy);
+
+                    // 어떤 row 사용했는지 결과 반환
+                    return DecreaseHubInventoriesByProductResult.Item.builder()
+                            .hubInventoryId(hubInventory.getHubInventoryId())
+                            .productId(hubInventory.getProductId())
+                            .build();
+                })
+                .toList();
+
+        return DecreaseHubInventoriesByProductResult.builder()
+                .items(items)
+                .build();
     }
 
     // 재고 복원
