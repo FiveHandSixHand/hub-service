@@ -3,10 +3,10 @@ package com.fhsh.daitda.hubservice.hubinventory.presentation.controller.internal
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
+import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.DecreaseHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.RestoreHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.FindHubInventoryResponse;
-import com.fhsh.daitda.hubservice.hubinventory.application.service.HubInventoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/internal/v1/hub-inventories")
 public class HubInventoryInternalController {
 
-    private final HubInventoryService hubInventoryService;
+    private final HubInventoryCommandService hubInventoryCommandService;
 
-    public HubInventoryInternalController(HubInventoryService hubInventoryService) {
-        this.hubInventoryService = hubInventoryService;
+    public HubInventoryInternalController(HubInventoryCommandService hubInventoryCommandService) {
+        this.hubInventoryCommandService = hubInventoryCommandService;
     }
 
     // 재고 차감
@@ -32,10 +32,9 @@ public class HubInventoryInternalController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResult result = hubInventoryService.decreaseHubInventory(command, null);
-        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
+        FindHubInventoryResult result = hubInventoryCommandService.decreaseHubInventory(command, null);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(FindHubInventoryResponse.from(result));
     }
 
     // 재고 복원
@@ -46,9 +45,8 @@ public class HubInventoryInternalController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResult result = hubInventoryService.restoreHubInventory(command, null);
-        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
+        FindHubInventoryResult result = hubInventoryCommandService.restoreHubInventory(command, null);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(FindHubInventoryResponse.from(result));
     }
 }

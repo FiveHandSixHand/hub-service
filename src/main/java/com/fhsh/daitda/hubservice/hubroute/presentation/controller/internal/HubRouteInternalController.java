@@ -1,9 +1,12 @@
 package com.fhsh.daitda.hubservice.hubroute.presentation.controller.internal;
 
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
-import com.fhsh.daitda.hubservice.hubroute.application.service.HubRouteService;
+import com.fhsh.daitda.hubservice.hubroute.application.service.query.HubRouteQueryService;
 import com.fhsh.daitda.hubservice.hubroute.presentation.dto.response.FindHubRouteResponse;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -11,10 +14,10 @@ import java.util.UUID;
 @RequestMapping("/internal/v1/hub-routes")
 public class HubRouteInternalController {
 
-    private final HubRouteService hubRouteService;
+    private final HubRouteQueryService hubRouteQueryService;
 
-    public HubRouteInternalController(HubRouteService hubRouteService) {
-        this.hubRouteService = hubRouteService;
+    public HubRouteInternalController(HubRouteQueryService hubRouteQueryService) {
+        this.hubRouteQueryService = hubRouteQueryService;
     }
 
     /**
@@ -25,7 +28,7 @@ public class HubRouteInternalController {
             @RequestParam UUID srcHubId,
             @RequestParam UUID destHubId
     ) {
-        FindHubRouteResult result = hubRouteService.searchHubRoute(srcHubId, destHubId);
+        FindHubRouteResult result = hubRouteQueryService.searchHubRoute(srcHubId, destHubId);
         return FindHubRouteResponse.from(result);
     }
 

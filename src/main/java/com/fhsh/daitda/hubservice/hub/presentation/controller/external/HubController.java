@@ -7,10 +7,11 @@ import com.fhsh.daitda.hubservice.hub.application.command.CreateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.command.UpdateHubCommand;
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
 import com.fhsh.daitda.hubservice.hub.application.result.ListHubResult;
+import com.fhsh.daitda.hubservice.hub.application.service.command.HubCommandService;
+import com.fhsh.daitda.hubservice.hub.application.service.query.HubQueryService;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.request.HubCreateRequest;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.request.HubUpdateRequest;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.response.HubResponse;
-import com.fhsh.daitda.hubservice.hub.application.service.HubService;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.response.ListHubResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,10 +25,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1/hubs")
 public class HubController {
 
-    private final HubService hubService;
+    private final HubCommandService hubCommandService;
+    private final HubQueryService hubQueryService;
 
-    public HubController(HubService hubService) {
-        this.hubService = hubService;
+    public HubController(HubCommandService hubCommandService, HubQueryService hubQueryService) {
+        this.hubCommandService = hubCommandService;
+        this.hubQueryService = hubQueryService;
     }
 
     /**
@@ -53,7 +56,7 @@ public class HubController {
                 .isCentral(request.getIsCentral())
                 .build();
 
-        FindHubResult result = hubService.createHub(command, authenticatedUser.userId());
+        FindHubResult result = hubCommandService.createHub(command, authenticatedUser.userId());
         HubResponse response = HubResponse.from(result);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -71,7 +74,7 @@ public class HubController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        List<ListHubResult> results = hubService.getHubs();
+        List<ListHubResult> results = hubQueryService.getHubs();
 
         List<ListHubResponse> responses = results
                 .stream()
@@ -94,7 +97,7 @@ public class HubController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        FindHubResult result = hubService.getHub(hubId);
+        FindHubResult result = hubQueryService.getHub(hubId);
         HubResponse response = HubResponse.from(result);
 
         return ResponseEntity.ok(response);
@@ -122,7 +125,7 @@ public class HubController {
                 .isCentral(request.getIsCentral())
                 .build();
 
-        FindHubResult result = hubService.updateHub(hubId, command, authenticatedUser.userId());
+        FindHubResult result = hubCommandService.updateHub(hubId, command, authenticatedUser.userId());
         HubResponse response = HubResponse.from(result);
 
         return ResponseEntity.ok(response);
@@ -141,7 +144,7 @@ public class HubController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        hubService.deleteHub(hubId, authenticatedUser.userId());
+        hubCommandService.deleteHub(hubId, authenticatedUser.userId());
         return ResponseEntity.noContent().build();
     }
 }

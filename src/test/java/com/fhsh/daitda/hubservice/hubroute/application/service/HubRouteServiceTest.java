@@ -5,6 +5,7 @@ import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
 import com.fhsh.daitda.hubservice.hub.domain.repository.HubRepository;
 import com.fhsh.daitda.hubservice.hubroute.application.command.CreateHubRouteCommand;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
+import com.fhsh.daitda.hubservice.hubroute.application.service.command.HubRouteCommandService;
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
@@ -39,7 +40,7 @@ public class HubRouteServiceTest {
     private HubRepository hubRepository;
 
     @InjectMocks
-    private HubRouteService hubRouteService;
+    private HubRouteCommandService hubRouteCommandService;
 
     private static final UUID HUB_ROUTE_ID = UUID.randomUUID();
     private static final UUID SRC_HUB_ID = UUID.randomUUID();
@@ -74,7 +75,7 @@ public class HubRouteServiceTest {
                 });
 
         // when
-        FindHubRouteResult result = hubRouteService.createHubRoute(command, USER_ID);
+        FindHubRouteResult result = hubRouteCommandService.createHubRoute(command, USER_ID);
 
         // then
         assertThat(result.hubRouteId()).isEqualTo(HUB_ROUTE_ID);
@@ -109,7 +110,7 @@ public class HubRouteServiceTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> hubRouteService.createHubRoute(command, USER_ID))
+        assertThatThrownBy(() -> hubRouteCommandService.createHubRoute(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
@@ -136,7 +137,7 @@ public class HubRouteServiceTest {
                 .thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> hubRouteService.createHubRoute(command, USER_ID))
+        assertThatThrownBy(() -> hubRouteCommandService.createHubRoute(command, USER_ID))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("출발 허브와 도착 허브는 같을 수 없습니다.");
 
@@ -172,7 +173,7 @@ public class HubRouteServiceTest {
                 .thenThrow(new DataIntegrityViolationException("DB 제약 조건 위반", constraintViolationException));
 
         // when & then
-        assertThatThrownBy(() -> hubRouteService.createHubRoute(command, USER_ID))
+        assertThatThrownBy(() -> hubRouteCommandService.createHubRoute(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_CONFLICT);

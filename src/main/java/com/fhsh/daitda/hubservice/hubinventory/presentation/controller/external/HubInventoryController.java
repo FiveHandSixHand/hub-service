@@ -7,11 +7,12 @@ import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInve
 import com.fhsh.daitda.hubservice.hubinventory.application.command.UpdateHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.ListHubInventoryResult;
+import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
+import com.fhsh.daitda.hubservice.hubinventory.application.service.query.HubInventoryQueryService;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.CreateHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.UpdateHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.FindHubInventoryResponse;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.ListHubInventoryResponse;
-import com.fhsh.daitda.hubservice.hubinventory.application.service.HubInventoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +25,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1/hub-inventories")
 public class HubInventoryController {
 
-    private final HubInventoryService hubInventoryService;
+    private final HubInventoryCommandService hubInventoryCommandService;
+    private final HubInventoryQueryService hubInventoryQueryService;
 
-    public HubInventoryController(HubInventoryService hubInventoryService) {
-        this.hubInventoryService = hubInventoryService;
+    public HubInventoryController(HubInventoryCommandService hubInventoryCommandService, HubInventoryQueryService hubInventoryQueryService) {
+        this.hubInventoryCommandService = hubInventoryCommandService;
+        this.hubInventoryQueryService = hubInventoryQueryService;
     }
 
     /**
@@ -50,10 +53,8 @@ public class HubInventoryController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResult result = hubInventoryService.createHubInventory(command, authenticatedUser.userId());
-        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        FindHubInventoryResult result = hubInventoryCommandService.createHubInventory(command, authenticatedUser.userId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(FindHubInventoryResponse.from(result));
     }
 
     /**
@@ -68,7 +69,7 @@ public class HubInventoryController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        List<ListHubInventoryResult> results = hubInventoryService.getHubInventories();
+        List<ListHubInventoryResult> results = hubInventoryQueryService.getHubInventories();
 
         List<ListHubInventoryResponse> responses = results.stream()
                 .map(response -> ListHubInventoryResponse.from(response))
@@ -92,10 +93,8 @@ public class HubInventoryController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        FindHubInventoryResult result = hubInventoryService.searchHubInventory(hubId, companyId, productId);
-        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
-
-        return ResponseEntity.ok(response);
+        FindHubInventoryResult result = hubInventoryQueryService.searchHubInventory(hubId, companyId, productId);
+        return ResponseEntity.ok(FindHubInventoryResponse.from(result));
     }
 
     /**
@@ -111,10 +110,9 @@ public class HubInventoryController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateAllAccess(authenticatedUser);
 
-        FindHubInventoryResult result = hubInventoryService.getHubInventory(hubInventoryId);
-        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
+        FindHubInventoryResult result = hubInventoryQueryService.getHubInventory(hubInventoryId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(FindHubInventoryResponse.from(result));
     }
 
     /**
@@ -135,10 +133,9 @@ public class HubInventoryController {
                 .quantity(request.getQuantity())
                 .build();
 
-        FindHubInventoryResult result = hubInventoryService.updateHubInventory(hubInventoryId, command, authenticatedUser.userId());
-        FindHubInventoryResponse response = FindHubInventoryResponse.from(result);
+        FindHubInventoryResult result = hubInventoryCommandService.updateHubInventory(hubInventoryId, command, authenticatedUser.userId());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(FindHubInventoryResponse.from(result));
     }
 
     /**
@@ -154,7 +151,7 @@ public class HubInventoryController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        hubInventoryService.deleteHubInventory(hubInventoryId, authenticatedUser.userId());
+        hubInventoryCommandService.deleteHubInventory(hubInventoryId, authenticatedUser.userId());
         return ResponseEntity.noContent().build();
     }
 }
