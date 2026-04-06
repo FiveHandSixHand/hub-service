@@ -96,7 +96,7 @@ public class HubInventoryCommandService {
 
                     // 현재 전제상 단건이어야 하므로, 복수 조회는 데이터 이상 상태로 간주
                     if (hubInventories.size() > 1) {
-                        throw new IllegalStateException("companyId와 productId 기준 재고가 복수로 조회되었습니다.");
+                        throw new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_DUPLICATED_RESULT);
                     }
 
                     // 정상 케이스: 정확히 1건 조회
