@@ -106,12 +106,13 @@ public class HubInventoryCommandService {
 
     // 재고 복원
     @Transactional
-    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, String updatedBy) {
-        HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
-
-        hubInventory.restoreQuantity(command.getQuantity(), updatedBy);
-
-        return FindHubInventoryResult.from(hubInventory);
+    public void restoreHubInventories(RestoreHubInventoryCommand command, String updatedBy) {
+        command.getOrderItems().forEach(orderItem -> {
+            // 실제 복원 대상 재고 조회
+            HubInventory hubInventory = findActiveHubInventory(orderItem.getHubInventoryId());
+            // 조회한 재고 수량 복원
+            hubInventory.restoreQuantity(orderItem.getQuantity(), updatedBy);
+        });
     }
 
     // 논리 삭제
