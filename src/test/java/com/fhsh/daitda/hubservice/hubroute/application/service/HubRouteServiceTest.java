@@ -5,6 +5,7 @@ import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
 import com.fhsh.daitda.hubservice.hub.domain.exception.HubErrorCode;
 import com.fhsh.daitda.hubservice.hub.domain.repository.HubRepository;
 import com.fhsh.daitda.hubservice.hubroute.application.command.CreateHubRouteCommand;
+import com.fhsh.daitda.hubservice.hubroute.application.command.UpdateHubRouteCommand;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.service.command.HubRouteCommandService;
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
@@ -362,6 +363,76 @@ public class HubRouteServiceTest {
                 destHub.getLongitude(),
                 destHub.getLatitude()
         );
+    }
+
+    @Test
+    @DisplayName("허브 경로 수정 시 네이버 길찾기 계산값으로 거리와 시간을 재계산한다")
+    void 허브경로수정_네이버재계산반영() {
+        // given
+        UpdateHubRouteCommand command = UpdateHubRouteCommand.builder().build();
+
+        HubRoute hubRoute = HubRoute.create(
+                SRC_HUB_ID,
+                DEST_HUB_ID,
+                10,
+                new BigDecimal("10.00"),
+                USER_ID
+        );
+        ReflectionTestUtils.invokeMethod(hubRoute, "prePersist");
+        ReflectionTestUtils.setField(hubRoute, "hubRouteId", HUB_ROUTE_ID);
+
+        Hub srcHub = 생성된허브(SRC_HUB_ID);
+        Hub destHub = 생성된허브(DEST_HUB_ID);
+
+        when(hubRouteRepository.findByHubRouteIdAndDeletedAtIsNull(HUB_ROUTE_ID))
+                .thenReturn(Optional.of(hubRoute));
+        when(hubRepository.findByHubIdAndDeletedAtIsNull(SRC_HUB_ID))
+                .thenReturn(Optional.of(srcHub));
+        when(hubRepository.findByHubIdAndDeletedAtIsNull(DEST_HUB_ID))
+                .thenReturn(Optional.of(destHub));
+
+        when(naverDirectionsClient.getDrivingMetrics(
+                srcHub.getLongitude(),
+                srcHub.getLatitude(),
+                destHub.getLongitude(),
+                destHub.getLatitude()
+        )).thenReturn(new NaverDirectionsClient.RouteMetrics(
+                77,
+                new BigDecimal("101.25")
+        ));
+
+        // when
+        FindHubRouteResult result = hubRouteCommandService.updateHubRoute(HUB_ROUTE_ID, command, USER_ID);
+
+        // then
+        assertThat(result.hubRouteId()).isEqualTo(HUB_ROUTE_ID);
+        assertThat(result.durationTime()).isEqualTo(77);
+        assertThat(result.distance()).isEqualByComparingTo("101.25");
+
+        verify(naverDirectionsClient).getDrivingMetrics(
+                srcHub.getLongitude(),
+                srcHub.getLatitude(),
+                destHub.getLongitude(),
+                destHub.getLatitude()
+        );
+    }
+
+    @Test
+    @DisplayName("수정 대상 허브 경로가 없으면 실패한다")
+    void 허브경로수정실패_대상없음() {
+        // given
+        UpdateHubRouteCommand command = UpdateHubRouteCommand.builder().build();
+
+        when(hubRouteRepository.findByHubRouteIdAndDeletedAtIsNull(HUB_ROUTE_ID))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> hubRouteCommandService.updateHubRoute(HUB_ROUTE_ID, command, USER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(HubRouteErrorCode.HUB_ROUTE_NOT_FOUND);
+
+        verify(naverDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
     }
 
     private Hub 생성된허브(UUID hubId) {
