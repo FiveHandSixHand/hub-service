@@ -15,7 +15,7 @@ public class RestoreHubInventoryRequest {
 
     @Valid
     @NotEmpty(message = "복원 항목은 최소 1개 이상이어야 합니다.")
-    private List<Item> orderItems;
+    private List<@NotNull(message = "복원 항목에 null 요소를 포함할 수 없습니다.") @Valid Item> orderItems;
 
     public RestoreHubInventoriesCommand toCommand() {
         return RestoreHubInventoriesCommand.builder()
