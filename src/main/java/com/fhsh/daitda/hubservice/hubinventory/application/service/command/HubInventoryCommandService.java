@@ -76,22 +76,36 @@ public class HubInventoryCommandService {
                 .toList();
     }
 
-    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProduct(DecreaseHubInventoriesByProductCommand command, UUID updatedBy) {
-
+    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProduct(
+            DecreaseHubInventoriesByProductCommand command,
+            UUID updatedBy
+    ) {
         List<DecreaseHubInventoriesByProductResult.Item> items = command.getOrderItems().stream()
                 .map(orderItem -> {
-                    // 회사 + 상품 기준으로 실제 재고 조회
-                    HubInventory hubInventory = hubInventoryRepository
-                            .findByCompanyIdAndProductIdAndDeletedAtIsNull(
+                    // 회사 + 상품 기준으로 조회
+                    List<HubInventory> hubInventories = hubInventoryRepository
+                            .findAllByCompanyIdAndProductIdAndDeletedAtIsNull(
                                     command.getSupplierCompanyId(),
                                     orderItem.getProductId()
-                            )
-                            .orElseThrow(() -> new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND));
+                            );
+
+                    // 조회 결과가 없으면 재고가 없는 것이므로 비즈니스 예외 처리
+                    if (hubInventories.isEmpty()) {
+                        throw new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND);
+                    }
+
+                    // 현재 전제상 단건이어야 하므로, 복수 조회는 데이터 이상 상태로 간주
+                    if (hubInventories.size() > 1) {
+                        throw new IllegalStateException("companyId와 productId 기준 재고가 복수로 조회되었습니다.");
+                    }
+
+                    // 정상 케이스: 정확히 1건 조회
+                    HubInventory hubInventory = hubInventories.get(0);
 
                     // 실제 재고 수량 차감
                     hubInventory.decrease(orderItem.getQuantity(), updatedBy);
 
-                    // 어떤 row 사용했는지 결과 반환
+                    // 어떤 row를 사용했는지 결과 반환
                     return DecreaseHubInventoriesByProductResult.Item.builder()
                             .hubInventoryId(hubInventory.getHubInventoryId())
                             .productId(hubInventory.getProductId())
