@@ -33,7 +33,7 @@ public class HubRouteController {
      * 출발 허브와 도착 허브 기준의 허브 경로를 생성
      *
      * 거리와 시간은 요청에서 직접 받지 않고
-     * Naver Directions 계산 결과를 기반으로 저장
+     * 카카오 길찾기 계산 결과를 기반으로 저장
      */
     @PostMapping
     public FindHubRouteResponse createHubRoute(@Valid @RequestBody CreateHubRouteRequest request,
