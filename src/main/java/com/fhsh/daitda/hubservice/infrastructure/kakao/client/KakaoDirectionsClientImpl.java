@@ -66,7 +66,7 @@ public class KakaoDirectionsClientImpl implements KakaoDirectionsClient {
                 throw new BusinessException(KakaoMobilityErrorCode.KAKAO_DIRECTIONS_INVALID_RESPONSE);
             }
 
-            int durationMinutes = Math.max(1, summary.duration() / 60);
+            int durationMinutes = Math.max(1, (summary.duration() + 59) / 60);
 
             BigDecimal distanceKilometers = BigDecimal.valueOf(summary.distance())
                     .divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
