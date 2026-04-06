@@ -82,6 +82,28 @@ public class HubRouteQueryServiceTest {
     }
 
     @Test
+    @DisplayName("직행 경로가 200km이면 릴레이 경로 리스트를 반환한다")
+    void 직행경로_200km_릴레이경로반환() {
+        HubRoute directRoute = 생성된경로(SRC_HUB_ID, DEST_HUB_ID, 180, "200.00");
+        HubRoute firstRelay = 생성된경로(SRC_HUB_ID, VIA_HUB_ID, 120, "120.00");
+        HubRoute secondRelay = 생성된경로(VIA_HUB_ID, DEST_HUB_ID, 70, "70.00");
+
+        when(hubRouteRepository.findBySrcHubIdAndDestHubIdAndDeletedAtIsNull(SRC_HUB_ID, DEST_HUB_ID))
+                .thenReturn(Optional.of(directRoute));
+
+        when(hubRouteRepository.findAllByDeletedAtIsNull())
+                .thenReturn(List.of(directRoute, firstRelay, secondRelay));
+
+        List<FindHubRouteResult> results = hubRouteQueryService.getHubRoutePath(SRC_HUB_ID, DEST_HUB_ID);
+
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).srcHubId()).isEqualTo(SRC_HUB_ID);
+        assertThat(results.get(0).destHubId()).isEqualTo(VIA_HUB_ID);
+        assertThat(results.get(1).srcHubId()).isEqualTo(VIA_HUB_ID);
+        assertThat(results.get(1).destHubId()).isEqualTo(DEST_HUB_ID);
+    }
+
+    @Test
     @DisplayName("직행 경로가 없더라도 릴레이 경로가 있으면 리스트를 반환한다")
     void 직행경로없음_릴레이경로반환() {
         // given
