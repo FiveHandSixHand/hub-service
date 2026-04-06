@@ -10,4 +10,4 @@ spring:
         service-id: config-server
   config:
     import:
-      - "configserver:"
+      - "optional:configserver:"  # optional 추가
