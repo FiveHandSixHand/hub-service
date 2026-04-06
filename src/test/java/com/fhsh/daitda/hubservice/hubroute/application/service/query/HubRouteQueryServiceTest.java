@@ -35,7 +35,7 @@ public class HubRouteQueryServiceTest {
     private static final UUID SRC_HUB_ID = UUID.randomUUID();
     private static final UUID DEST_HUB_ID = UUID.randomUUID();
     private static final UUID VIA_HUB_ID = UUID.randomUUID();
-    private static final String USER_ID = "test-user";
+    private static final UUID USER_ID = UUID.randomUUID();
 
     @Test
     @DisplayName("직행 경로가 200km 미만이면 1개짜리 리스트 반환")

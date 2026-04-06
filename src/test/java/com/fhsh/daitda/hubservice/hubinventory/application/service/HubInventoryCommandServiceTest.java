@@ -40,7 +40,7 @@ public class HubInventoryCommandServiceTest {
     private static final UUID COMPANY_ID = UUID.randomUUID();
     private static final UUID PRODUCT_ID = UUID.randomUUID();
     private static final UUID HUB_INVENTORY_ID = UUID.randomUUID();
-    private static final String USER_ID = "test-user";
+    private static final UUID USER_ID = UUID.randomUUID();
 
     @Test
     @DisplayName("허브 재고 생성 성공")
