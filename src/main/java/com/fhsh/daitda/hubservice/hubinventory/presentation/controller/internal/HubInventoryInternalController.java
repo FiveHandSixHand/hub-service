@@ -47,7 +47,7 @@ public class HubInventoryInternalController {
             @Valid @RequestBody DecreaseHubInventoriesByProductRequest request
     ) {
         DecreaseHubInventoriesByProductResult result =
-                hubInventoryCommandService.decreaseHubInventoriesByProductResult(request.toCommand(), null);
+                hubInventoryCommandService.decreaseHubInventoriesByProduct(request.toCommand(), null);
 
         return ResponseEntity.ok(DecreaseHubInventoriesByProductResponse.from(result));
     }

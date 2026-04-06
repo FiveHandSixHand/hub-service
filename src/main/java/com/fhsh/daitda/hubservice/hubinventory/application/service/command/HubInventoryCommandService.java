@@ -76,7 +76,7 @@ public class HubInventoryCommandService {
                 .toList();
     }
 
-    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProductResult(DecreaseHubInventoriesByProductCommand command, String updatedBy) {
+    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProduct(DecreaseHubInventoriesByProductCommand command, String updatedBy) {
 
         List<DecreaseHubInventoriesByProductResult.Item> items = command.getOrderItems().stream()
                 .map(orderItem -> {
