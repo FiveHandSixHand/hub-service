@@ -4,6 +4,7 @@ import com.fhsh.daitda.exception.BusinessException;
 import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
 import com.fhsh.daitda.hubservice.hub.domain.exception.HubErrorCode;
 import com.fhsh.daitda.hubservice.hub.domain.repository.HubRepository;
+import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRoutePathResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
@@ -62,24 +63,34 @@ public class HubRouteQueryService {
      * - 직행 route가 존재하고 거리가 200km 미만이면 1개짜리 리스트 반환
      * - 직행 route가 200km 이상이거나 직행 route가 없으면 릴레이 경로를 계산해서 리스트 반환
      */
-    public List<FindHubRouteResult> getHubRoutePath(UUID srcHubId, UUID destHubId) {
+    public List<FindHubRoutePathResult> getHubRoutePath(UUID srcHubId, UUID destHubId) {
         validateDifferentHub(srcHubId, destHubId);
 
         Optional<HubRoute> directRoute = hubRouteRepository.findBySrcHubIdAndDestHubIdAndDeletedAtIsNull(srcHubId, destHubId);
 
         if (directRoute.isPresent() && directRoute.get().getDistance().compareTo(RELAY_THRESHOLD_KM) < 0) {
-            return List.of(toFindHubRouteResult(directRoute.get()));
+            return List.of(toFindHubRoutePathResult(1, directRoute.get()));
         }
 
-        return findRelayPath(srcHubId, destHubId).stream()
-                .map(this::toFindHubRouteResult)
-                .toList();
+        List<HubRoute> relayPath = findRelayPath(srcHubId, destHubId);
+
+        List<FindHubRoutePathResult> results = new ArrayList<>();
+        for (int i = 0; i < relayPath.size(); i++) {
+            results.add(toFindHubRoutePathResult(i + 1, relayPath.get(i)));
+        }
+        return results;
     }
 
     private FindHubRouteResult toFindHubRouteResult(HubRoute hubRoute) {
         Hub srcHub = findActiveHub(hubRoute.getSrcHubId());
         Hub destHub = findActiveHub(hubRoute.getDestHubId());
         return FindHubRouteResult.from(hubRoute, srcHub, destHub);
+    }
+
+    private FindHubRoutePathResult toFindHubRoutePathResult(Integer sequence, HubRoute hubRoute) {
+        Hub srcHub = findActiveHub(hubRoute.getSrcHubId());
+        Hub destHub = findActiveHub(hubRoute.getDestHubId());
+        return FindHubRoutePathResult.from(sequence, hubRoute, srcHub, destHub);
     }
 
     private Hub findActiveHub(UUID hubId) {
