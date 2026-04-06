@@ -1,10 +1,7 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
 import com.fhsh.daitda.exception.BusinessException;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoriesByProductCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoriesCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.*;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.DecreaseHubInventoriesByProductResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
@@ -266,6 +263,72 @@ public class HubInventoryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hubInventoryCommandService.decreaseHubInventoriesByProduct(command, USER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("여러 재고를 한 번에 복원할 수 있다")
+    void 여러재고_일괄복원성공() {
+        // given
+        UUID hubInventoryId1 = UUID.randomUUID();
+        UUID hubInventoryId2 = UUID.randomUUID();
+
+        HubInventory inventory1 = HubInventory.create(HUB_ID, COMPANY_ID, PRODUCT_ID, 90, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory1, "prePersist");
+        ReflectionTestUtils.setField(inventory1, "hubInventoryId", hubInventoryId1);
+
+        HubInventory inventory2 = HubInventory.create(HUB_ID, COMPANY_ID, UUID.randomUUID(), 45, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory2, "prePersist");
+        ReflectionTestUtils.setField(inventory2, "hubInventoryId", hubInventoryId2);
+
+        RestoreHubInventoryCommand command = RestoreHubInventoryCommand.builder()
+                .orderItems(List.of(
+                        RestoreHubInventoryCommand.Item.builder()
+                                .hubInventoryId(hubInventoryId1)
+                                .quantity(10)
+                                .build(),
+                        RestoreHubInventoryCommand.Item.builder()
+                                .hubInventoryId(hubInventoryId2)
+                                .quantity(5)
+                                .build()
+                ))
+                .build();
+
+        when(hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(hubInventoryId1))
+                .thenReturn(Optional.of(inventory1));
+        when(hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(hubInventoryId2))
+                .thenReturn(Optional.of(inventory2));
+
+        // when
+        hubInventoryCommandService.restoreHubInventories(command, USER_ID);
+
+        // then
+        assertThat(inventory1.getQuantity()).isEqualTo(100);
+        assertThat(inventory2.getQuantity()).isEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("복원 대상 재고를 찾지 못하면 복원은 실패한다")
+    void 재고복원실패_대상없음() {
+        // given
+        UUID hubInventoryId = UUID.randomUUID();
+
+        RestoreHubInventoryCommand command = RestoreHubInventoryCommand.builder()
+                .orderItems(List.of(
+                        RestoreHubInventoryCommand.Item.builder()
+                                .hubInventoryId(hubInventoryId)
+                                .quantity(10)
+                                .build()
+                ))
+                .build();
+
+        when(hubInventoryRepository.findByHubInventoryIdAndDeletedAtIsNull(hubInventoryId))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> hubInventoryCommandService.restoreHubInventories(command, USER_ID))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND);
