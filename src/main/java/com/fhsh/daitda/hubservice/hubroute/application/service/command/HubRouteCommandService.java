@@ -10,6 +10,8 @@ import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
+import com.fhsh.daitda.hubservice.infrastructure.naver.client.NaverDirectionsClient;
+import com.fhsh.daitda.hubservice.infrastructure.naver.dto.NaverDirectionsResponse;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -23,24 +25,35 @@ public class HubRouteCommandService {
 
     private final HubRouteRepository hubRouteRepository;
     private final HubRepository hubRepository;
+    private final NaverDirectionsClient naverDirectionsClient;
 
-    public HubRouteCommandService(HubRouteRepository hubRouteRepository, HubRepository hubRepository) {
+    public HubRouteCommandService(HubRouteRepository hubRouteRepository, HubRepository hubRepository, NaverDirectionsClient naverDirectionsClient) {
         this.hubRouteRepository = hubRouteRepository;
         this.hubRepository = hubRepository;
+        this.naverDirectionsClient = naverDirectionsClient;
     }
+
 
     // 허브 경로 생성
     @Transactional
     public FindHubRouteResult createHubRoute(CreateHubRouteCommand command, UUID createdBy) {
-        findActiveHub(command.getSrcHubId());
-        findActiveHub(command.getDestHubId());
+        Hub srcHub = findActiveHub(command.getSrcHubId());
+        Hub destHub = findActiveHub(command.getDestHubId());
+
         validateDuplicateHubRoute(command.getSrcHubId(), command.getDestHubId());
+
+        NaverDirectionsClient.RouteMetrics metrics = naverDirectionsClient.getDrivingMetrics(
+                srcHub.getLongitude(),
+                srcHub.getLatitude(),
+                destHub.getLongitude(),
+                destHub.getLatitude()
+        );
 
         HubRoute hubRoute = HubRoute.create(
                 command.getSrcHubId(),
                 command.getDestHubId(),
-                command.getDurationTime(),
-                command.getDistance(),
+                metrics.durationMinutes(),
+                metrics.distanceKilometers(),
                 createdBy
         );
 
