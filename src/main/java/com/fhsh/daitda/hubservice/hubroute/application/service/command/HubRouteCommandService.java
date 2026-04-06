@@ -10,7 +10,7 @@ import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
-import com.fhsh.daitda.hubservice.infrastructure.naver.client.NaverDirectionsClient;
+import com.fhsh.daitda.hubservice.infrastructure.kakao.client.KakaoDirectionsClient;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -24,14 +24,15 @@ public class HubRouteCommandService {
 
     private final HubRouteRepository hubRouteRepository;
     private final HubRepository hubRepository;
-    private final NaverDirectionsClient naverDirectionsClient;
+    private final KakaoDirectionsClient kakaoDirectionsClient;
 
-    public HubRouteCommandService(HubRouteRepository hubRouteRepository, HubRepository hubRepository, NaverDirectionsClient naverDirectionsClient) {
+    public HubRouteCommandService(HubRouteRepository hubRouteRepository,
+                                  HubRepository hubRepository,
+                                  KakaoDirectionsClient kakaoDirectionsClient) {
         this.hubRouteRepository = hubRouteRepository;
         this.hubRepository = hubRepository;
-        this.naverDirectionsClient = naverDirectionsClient;
+        this.kakaoDirectionsClient = kakaoDirectionsClient;
     }
-
 
     // 허브 경로 생성
     @Transactional
@@ -43,7 +44,7 @@ public class HubRouteCommandService {
 
         validateDuplicateHubRoute(command.getSrcHubId(), command.getDestHubId());
 
-        NaverDirectionsClient.RouteMetrics metrics = naverDirectionsClient.getDrivingMetrics(
+        KakaoDirectionsClient.RouteMetrics metrics = kakaoDirectionsClient.getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
@@ -77,7 +78,7 @@ public class HubRouteCommandService {
         Hub srcHub = findActiveHub(hubRoute.getSrcHubId());
         Hub destHub = findActiveHub(hubRoute.getDestHubId());
 
-        NaverDirectionsClient.RouteMetrics metrics = naverDirectionsClient.getDrivingMetrics(
+        KakaoDirectionsClient.RouteMetrics metrics = kakaoDirectionsClient.getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
