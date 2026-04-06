@@ -53,7 +53,7 @@ public class HubInventory extends BaseUserEntity {
     }
 
     public static HubInventory create(UUID hubId, UUID companyId, UUID productId,
-                                      Integer quantity, String createdBy) {
+                                      Integer quantity, UUID createdBy) {
 
         validateRequiredIds(hubId, companyId, productId);
         validateNonNegativeQuantity(quantity);
@@ -76,14 +76,14 @@ public class HubInventory extends BaseUserEntity {
         }
     }
 
-    public void updateQuantity(Integer quantity, String updatedBy) {
+    public void updateQuantity(Integer quantity, UUID updatedBy) {
         validateNonNegativeQuantity(quantity);
 
         this.quantity = quantity;
         this.updatedBy = updatedBy;
     }
 
-    public void decrease(Integer quantity, String updatedBy) {
+    public void decrease(Integer quantity, UUID updatedBy) {
         validatePositiveQuantity(quantity);
 
         if (this.quantity < quantity) {
@@ -94,14 +94,14 @@ public class HubInventory extends BaseUserEntity {
         this.updatedBy = updatedBy;
     }
 
-    public void restoreQuantity(Integer quantity, String restoredBy) {
+    public void restoreQuantity(Integer quantity, UUID restoredBy) {
         validatePositiveQuantity(quantity);
 
         this.quantity += quantity;
         this.updatedBy = restoredBy;
     }
 
-    public void softDelete(String deletedBy) {
+    public void softDelete(UUID deletedBy) {
         delete(deletedBy);
     }
 
