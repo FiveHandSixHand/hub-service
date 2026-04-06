@@ -8,8 +8,8 @@ import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.Decrease
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.RestoreHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.DecreaseHubInventoriesByProductResponse;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.DecreaseHubInventoriesResponse;
+import com.fhsh.daitda.response.CommonResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +21,8 @@ import java.util.List;
 @RequestMapping("/internal/v1/hub-inventories")
 public class HubInventoryInternalController {
 
+    private static final String INTERNAL_SYSTEM = "SYSTEM";
+
     private final HubInventoryCommandService hubInventoryCommandService;
 
     public HubInventoryInternalController(HubInventoryCommandService hubInventoryCommandService) {
@@ -29,11 +31,11 @@ public class HubInventoryInternalController {
 
     // 재고 차감
     @PatchMapping("/decrease")
-    public ResponseEntity<DecreaseHubInventoriesResponse> decreaseHubInventory(@Valid @RequestBody DecreaseHubInventoryRequest request) {
+    public CommonResponse<DecreaseHubInventoriesResponse> decreaseHubInventory(@Valid @RequestBody DecreaseHubInventoryRequest request) {
         List<FindHubInventoryResult> results =
-                hubInventoryCommandService.decreaseHubInventories(request.toCommand(), null);
+                hubInventoryCommandService.decreaseHubInventories(request.toCommand(), INTERNAL_SYSTEM);
 
-        return ResponseEntity.ok(DecreaseHubInventoriesResponse.from(results));
+        return CommonResponse.success(DecreaseHubInventoriesResponse.from(results));
     }
 
     /**
@@ -43,19 +45,19 @@ public class HubInventoryInternalController {
      * 실제 사용한 hubInventoryId 반환
      */
     @PatchMapping("/decrease-by-product")
-    public ResponseEntity<DecreaseHubInventoriesByProductResponse> decreaseHubInventoriesByProduct(
+    public CommonResponse<DecreaseHubInventoriesByProductResponse> decreaseHubInventoriesByProduct(
             @Valid @RequestBody DecreaseHubInventoriesByProductRequest request
     ) {
         DecreaseHubInventoriesByProductResult result =
-                hubInventoryCommandService.decreaseHubInventoriesByProduct(request.toCommand(), null);
+                hubInventoryCommandService.decreaseHubInventoriesByProduct(request.toCommand(), INTERNAL_SYSTEM);
 
-        return ResponseEntity.ok(DecreaseHubInventoriesByProductResponse.from(result));
+        return CommonResponse.success(DecreaseHubInventoriesByProductResponse.from(result));
     }
 
     // 재고 복원
     @PatchMapping("/restoration")
-    public ResponseEntity<Void> restoreHubInventory(@Valid @RequestBody RestoreHubInventoryRequest request) {
-        hubInventoryCommandService.restoreHubInventories(request.toCommand(), null);
-        return ResponseEntity.ok().build();
+    public CommonResponse<Void> restoreHubInventory(@Valid @RequestBody RestoreHubInventoryRequest request) {
+        hubInventoryCommandService.restoreHubInventories(request.toCommand(), INTERNAL_SYSTEM);
+        return CommonResponse.success(null);
     }
 }
