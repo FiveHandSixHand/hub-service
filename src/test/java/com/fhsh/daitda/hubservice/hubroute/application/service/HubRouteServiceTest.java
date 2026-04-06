@@ -11,7 +11,7 @@ import com.fhsh.daitda.hubservice.hubroute.application.service.command.HubRouteC
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
-import com.fhsh.daitda.hubservice.infrastructure.naver.client.NaverDirectionsClient;
+import com.fhsh.daitda.hubservice.infrastructure.kakao.client.KakaoDirectionsClient;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ public class HubRouteServiceTest {
     private HubRepository hubRepository;
 
     @Mock
-    private NaverDirectionsClient naverDirectionsClient;
+    private KakaoDirectionsClient kakaoDirectionsClient;
 
     @InjectMocks
     private HubRouteCommandService hubRouteCommandService;
@@ -72,13 +72,12 @@ public class HubRouteServiceTest {
         when(hubRouteRepository.existsBySrcHubIdAndDestHubIdAndDeletedAtIsNull(SRC_HUB_ID, DEST_HUB_ID))
                 .thenReturn(false);
 
-        // Naver Directions 계산 결과를 mock
-        when(naverDirectionsClient.getDrivingMetrics(
+        when(kakaoDirectionsClient.getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
                 destHub.getLatitude()
-        )).thenReturn(new NaverDirectionsClient.RouteMetrics(
+        )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 95,
                 new BigDecimal("123.45")
         ));
@@ -106,7 +105,7 @@ public class HubRouteServiceTest {
         verify(hubRepository).findByHubIdAndDeletedAtIsNull(SRC_HUB_ID);
         verify(hubRepository).findByHubIdAndDeletedAtIsNull(DEST_HUB_ID);
         verify(hubRouteRepository).existsBySrcHubIdAndDestHubIdAndDeletedAtIsNull(SRC_HUB_ID, DEST_HUB_ID);
-        verify(naverDirectionsClient).getDrivingMetrics(
+        verify(kakaoDirectionsClient).getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
@@ -137,7 +136,7 @@ public class HubRouteServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
 
-        verify(naverDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
+        verify(kakaoDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
         verify(hubRouteRepository, never()).saveAndFlush(any(HubRoute.class));
     }
 
@@ -157,13 +156,13 @@ public class HubRouteServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("출발 허브와 도착 허브는 같을 수 없습니다.");
 
-        verify(naverDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
+        verify(kakaoDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
         verify(hubRouteRepository, never()).saveAndFlush(any(HubRoute.class));
     }
 
     @Test
-    @DisplayName("허브 경로 생성 시 네이버 길찾기 계산값으로 거리와 시간을 저장한다")
-    void 허브경로생성_네이버계산값반영() {
+    @DisplayName("허브 경로 생성 시 카카오 길찾기 계산값으로 거리와 시간을 저장한다")
+    void 허브경로생성_카카오계산값반영() {
         // given
         UUID srcHubId = UUID.randomUUID();
         UUID destHubId = UUID.randomUUID();
@@ -203,12 +202,12 @@ public class HubRouteServiceTest {
         when(hubRouteRepository.existsBySrcHubIdAndDestHubIdAndDeletedAtIsNull(srcHubId, destHubId))
                 .thenReturn(false);
 
-        when(naverDirectionsClient.getDrivingMetrics(
+        when(kakaoDirectionsClient.getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
                 destHub.getLatitude()
-        )).thenReturn(new NaverDirectionsClient.RouteMetrics(
+        )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 95,
                 new BigDecimal("123.45")
         ));
@@ -231,7 +230,7 @@ public class HubRouteServiceTest {
         assertThat(result.durationTime()).isEqualTo(95);
         assertThat(result.distance()).isEqualByComparingTo("123.45");
 
-        verify(naverDirectionsClient).getDrivingMetrics(
+        verify(kakaoDirectionsClient).getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
@@ -257,7 +256,7 @@ public class HubRouteServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(HubErrorCode.HUB_NOT_FOUND);
 
-        verify(naverDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
+        verify(kakaoDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
         verify(hubRouteRepository, never()).saveAndFlush(any(HubRoute.class));
     }
 
@@ -308,7 +307,7 @@ public class HubRouteServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
 
-        verify(naverDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
+        verify(kakaoDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
     }
 
     @Test
@@ -330,13 +329,12 @@ public class HubRouteServiceTest {
         when(hubRouteRepository.existsBySrcHubIdAndDestHubIdAndDeletedAtIsNull(SRC_HUB_ID, DEST_HUB_ID))
                 .thenReturn(false);
 
-        // saveAndFlush 전까지는 정상 흐름을 타야 하므로 Naver 계산값도 stub
-        when(naverDirectionsClient.getDrivingMetrics(
+        when(kakaoDirectionsClient.getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
                 destHub.getLatitude()
-        )).thenReturn(new NaverDirectionsClient.RouteMetrics(
+        )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 95,
                 new BigDecimal("123.45")
         ));
@@ -357,7 +355,7 @@ public class HubRouteServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
 
-        verify(naverDirectionsClient).getDrivingMetrics(
+        verify(kakaoDirectionsClient).getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
@@ -366,8 +364,8 @@ public class HubRouteServiceTest {
     }
 
     @Test
-    @DisplayName("허브 경로 수정 시 네이버 길찾기 계산값으로 거리와 시간을 재계산한다")
-    void 허브경로수정_네이버재계산반영() {
+    @DisplayName("허브 경로 수정 시 카카오 길찾기 계산값으로 거리와 시간을 재계산한다")
+    void 허브경로수정_카카오재계산반영() {
         // given
         UpdateHubRouteCommand command = UpdateHubRouteCommand.builder().build();
 
@@ -391,12 +389,12 @@ public class HubRouteServiceTest {
         when(hubRepository.findByHubIdAndDeletedAtIsNull(DEST_HUB_ID))
                 .thenReturn(Optional.of(destHub));
 
-        when(naverDirectionsClient.getDrivingMetrics(
+        when(kakaoDirectionsClient.getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
                 destHub.getLatitude()
-        )).thenReturn(new NaverDirectionsClient.RouteMetrics(
+        )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 77,
                 new BigDecimal("101.25")
         ));
@@ -409,7 +407,7 @@ public class HubRouteServiceTest {
         assertThat(result.durationTime()).isEqualTo(77);
         assertThat(result.distance()).isEqualByComparingTo("101.25");
 
-        verify(naverDirectionsClient).getDrivingMetrics(
+        verify(kakaoDirectionsClient).getDrivingMetrics(
                 srcHub.getLongitude(),
                 srcHub.getLatitude(),
                 destHub.getLongitude(),
@@ -432,16 +430,14 @@ public class HubRouteServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(HubRouteErrorCode.HUB_ROUTE_NOT_FOUND);
 
-        verify(naverDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
+        verify(kakaoDirectionsClient, never()).getDrivingMetrics(any(), any(), any(), any());
     }
 
     private Hub 생성된허브(UUID hubId) {
         Hub hub = Hub.create(
                 "테스트 허브",
                 "서울특별시 송파구 테스트로 1",
-                // 경도(longitude)
                 new BigDecimal("126.978000"),
-                // 위도(latitude)
                 new BigDecimal("37.566500"),
                 false,
                 USER_ID
