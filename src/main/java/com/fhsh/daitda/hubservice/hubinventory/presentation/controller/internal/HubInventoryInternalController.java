@@ -2,10 +2,13 @@ package com.fhsh.daitda.hubservice.hubinventory.presentation.controller.internal
 
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.result.DecreaseHubInventoriesByProductResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
+import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.DecreaseHubInventoriesByProductRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.DecreaseHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.RestoreHubInventoryRequest;
+import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.DecreaseHubInventoriesByProductResponse;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.DecreaseHubInventoriesResponse;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.FindHubInventoryResponse;
 import jakarta.validation.Valid;
@@ -34,6 +37,22 @@ public class HubInventoryInternalController {
                 hubInventoryCommandService.decreaseHubInventories(request.toCommand(), null);
 
         return ResponseEntity.ok(DecreaseHubInventoriesResponse.from(results));
+    }
+
+    /**
+     * 주문 생성용 재고 차감 API
+     * supplierCompanyId + productId 기준으로 재고 row 조회
+     * 수량 차감
+     * 실제 사용한 hubInventoryId 반환
+     */
+    @PatchMapping("/decrease-by-product")
+    public ResponseEntity<DecreaseHubInventoriesByProductResponse> decreaseHubInventoriesByProduct(
+            @Valid @RequestBody DecreaseHubInventoriesByProductRequest request
+    ) {
+        DecreaseHubInventoriesByProductResult result =
+                hubInventoryCommandService.decreaseHubInventoriesByProductResult(request.toCommand(), null);
+
+        return ResponseEntity.ok(DecreaseHubInventoriesByProductResponse.from(result));
     }
 
     // 재고 복원
