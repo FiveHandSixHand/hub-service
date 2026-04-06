@@ -3,6 +3,7 @@ package com.fhsh.daitda.hubservice.hub.presentation.controller.internal;
 import com.fhsh.daitda.hubservice.hub.application.result.FindHubResult;
 import com.fhsh.daitda.hubservice.hub.application.service.query.HubQueryService;
 import com.fhsh.daitda.hubservice.hub.presentation.dto.response.HubResponse;
+import com.fhsh.daitda.response.CommonResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +22,8 @@ public class HubInternalController {
     }
 
     @GetMapping("/{hubId}")
-    public HubResponse getHub(@PathVariable UUID hubId) {
+    public CommonResponse<HubResponse> getHub(@PathVariable UUID hubId) {
         FindHubResult result = hubQueryService.getHub(hubId);
-        return HubResponse.from(result);
+        return CommonResponse.success(HubResponse.from(result));
     }
 }
