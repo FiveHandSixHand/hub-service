@@ -12,18 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class UpdateHubRouteRequest {
 
-    @NotNull(message = "소요 시간은 필수입니다.")
-    @Positive(message = "소요 시간은 0보다 커야 합니다.")
-    private Integer durationTime;
-
-    @NotNull(message = "이동 거리는 필수입니다.")
-    @Positive(message = "이동 거리는 0보다 커야 합니다.")
-    private BigDecimal distance;
-
     public UpdateHubRouteCommand toCommand() {
-        return UpdateHubRouteCommand.builder()
-                .durationTime(durationTime)
-                .distance(distance)
-                .build();
+        return UpdateHubRouteCommand.builder().build();
     }
 }
