@@ -221,10 +221,10 @@ public class HubInventoryCommandServiceTest {
                 ))
                 .build();
 
-        when(hubInventoryRepository.findByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId1))
-                .thenReturn(Optional.of(inventory1));
-        when(hubInventoryRepository.findByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId2))
-                .thenReturn(Optional.of(inventory2));
+        when(hubInventoryRepository.findAllByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId1))
+                .thenReturn(List.of(inventory1));
+        when(hubInventoryRepository.findAllByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId2))
+                .thenReturn(List.of(inventory2));
 
         // when
         DecreaseHubInventoriesByProductResult result =
@@ -258,8 +258,8 @@ public class HubInventoryCommandServiceTest {
                 ))
                 .build();
 
-        when(hubInventoryRepository.findByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId))
-                .thenReturn(Optional.empty());
+        when(hubInventoryRepository.findAllByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId))
+                .thenReturn(List.of());
 
         // when & then
         assertThatThrownBy(() -> hubInventoryCommandService.decreaseHubInventoriesByProduct(command, USER_ID))
