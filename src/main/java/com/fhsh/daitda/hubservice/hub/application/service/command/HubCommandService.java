@@ -36,7 +36,7 @@ public class HubCommandService {
      * - createdBy를 받아 audit 값을 남기므로 쓰기 성격이 명확하기 때문
      */
     @Transactional
-    public FindHubResult createHub(CreateHubCommand command, String createdBy) {
+    public FindHubResult createHub(CreateHubCommand command, UUID createdBy) {
         Hub hub = Hub.create(
                 command.getHubName(),
                 command.getHubAddress(),
@@ -54,7 +54,7 @@ public class HubCommandService {
      * 허브 정보 수정
      */
     @Transactional
-    public FindHubResult updateHub(UUID hubId, UpdateHubCommand command, String updatedBy) {
+    public FindHubResult updateHub(UUID hubId, UpdateHubCommand command, UUID updatedBy) {
         Hub hub = findActiveHub(hubId);
 
         hub.update(
@@ -72,7 +72,7 @@ public class HubCommandService {
      * 허브 논리 삭제
      */
     @Transactional
-    public void deleteHub(UUID hubId, String deletedBy) {
+    public void deleteHub(UUID hubId, UUID deletedBy) {
         Hub hub = findActiveHub(hubId);
         hub.softDelete(deletedBy);
     }
