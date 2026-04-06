@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
 
+// Naver Directions 5 응답 DTO
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record NaverDirectionsResponse(
         Integer code,
