@@ -2,8 +2,10 @@ package com.fhsh.daitda.hubservice.hubinventory.application.service;
 
 import com.fhsh.daitda.exception.BusinessException;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoriesByProductCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoriesCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.result.DecreaseHubInventoriesByProductResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
@@ -188,6 +190,85 @@ public class HubInventoryServiceTest {
         assertThat(results).hasSize(2);
         assertThat(results.get(0).quantity()).isEqualTo(90);
         assertThat(results.get(1).quantity()).isEqualTo(45);
+    }
+
+    @Test
+    @DisplayName("회사와 상품 기준으로 재고를 찾아 주문 생성용 차감을 수행")
+    void 주문생성용_재고차감_성공() {
+        // given
+        UUID supplierCompanyId = UUID.randomUUID();
+        UUID productId1 = UUID.randomUUID();
+        UUID productId2 = UUID.randomUUID();
+        UUID hubInventoryId1 = UUID.randomUUID();
+        UUID hubInventoryId2 = UUID.randomUUID();
+
+        HubInventory inventory1 = HubInventory.create(HUB_ID, supplierCompanyId, productId1, 100, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory1, "prePersist");
+        ReflectionTestUtils.setField(inventory1, "hubInventoryId", hubInventoryId1);
+
+        HubInventory inventory2 = HubInventory.create(HUB_ID, supplierCompanyId, productId2, 50, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory2, "prePersist");
+        ReflectionTestUtils.setField(inventory2, "hubInventoryId", hubInventoryId2);
+
+        DecreaseHubInventoriesByProductCommand command = DecreaseHubInventoriesByProductCommand.builder()
+                .supplierCompanyId(supplierCompanyId)
+                .orderItems(List.of(
+                        DecreaseHubInventoriesByProductCommand.Item.builder()
+                                .productId(productId1)
+                                .quantity(10)
+                                .build(),
+                        DecreaseHubInventoriesByProductCommand.Item.builder()
+                                .productId(productId2)
+                                .quantity(5)
+                                .build()
+                ))
+                .build();
+
+        when(hubInventoryRepository.findByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId1))
+                .thenReturn(Optional.of(inventory1));
+        when(hubInventoryRepository.findByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId2))
+                .thenReturn(Optional.of(inventory2));
+
+        // when
+        DecreaseHubInventoriesByProductResult result =
+                hubInventoryCommandService.decreaseHubInventoriesByProduct(command, USER_ID);
+
+        // then
+        assertThat(result.getItems()).hasSize(2);
+        assertThat(result.getItems().get(0).getHubInventoryId()).isEqualTo(hubInventoryId1);
+        assertThat(result.getItems().get(0).getProductId()).isEqualTo(productId1);
+        assertThat(result.getItems().get(1).getHubInventoryId()).isEqualTo(hubInventoryId2);
+        assertThat(result.getItems().get(1).getProductId()).isEqualTo(productId2);
+
+        assertThat(inventory1.getQuantity()).isEqualTo(90);
+        assertThat(inventory2.getQuantity()).isEqualTo(45);
+    }
+
+    @Test
+    @DisplayName("회사와 상품 기준으로 재고를 찾지 못하면 주문 생성용 차감은 실패")
+    void 주문생성용_재고차감_실패_재고없음(){
+        // given
+        UUID supplierCompanyId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+
+        DecreaseHubInventoriesByProductCommand command = DecreaseHubInventoriesByProductCommand.builder()
+                .supplierCompanyId(supplierCompanyId)
+                .orderItems(List.of(
+                        DecreaseHubInventoriesByProductCommand.Item.builder()
+                                .productId(productId)
+                                .quantity(10)
+                                .build()
+                ))
+                .build();
+
+        when(hubInventoryRepository.findByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> hubInventoryCommandService.decreaseHubInventoriesByProduct(command, USER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND);
     }
 
     private HubInventory 생성된재고(int quantity) {
