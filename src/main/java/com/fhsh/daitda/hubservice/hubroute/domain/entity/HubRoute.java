@@ -46,7 +46,7 @@ public class HubRoute extends BaseUserEntity {
 
     public static HubRoute create(UUID srcHubId, UUID destHubId,
                                   Integer durationTime, BigDecimal distance,
-                                  String createdBy) {
+                                  UUID createdBy) {
         validateHubIds(srcHubId, destHubId);
         validateDurationTime(durationTime);
         validateDistance(distance);
@@ -69,7 +69,7 @@ public class HubRoute extends BaseUserEntity {
         }
     }
 
-    public void updateRouteInfo(Integer durationTime, BigDecimal distance, String updatedBy) {
+    public void updateRouteInfo(Integer durationTime, BigDecimal distance, UUID updatedBy) {
         validateDurationTime(durationTime);
         validateDistance(distance);
 
@@ -78,7 +78,7 @@ public class HubRoute extends BaseUserEntity {
         this.updatedBy = updatedBy;
     }
 
-    public void softDelete(String deletedBy) {
+    public void softDelete(UUID deletedBy) {
         delete(deletedBy);
     }
 
