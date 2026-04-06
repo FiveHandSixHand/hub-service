@@ -27,7 +27,7 @@ public class HubInventoryCommandService {
 
     // 재고생성
     @Transactional
-    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, String createdBy) {
+    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, UUID createdBy) {
         validateDuplicateHubInventory(command.getHubId(), command.getCompanyId(), command.getProductId());
 
         HubInventory hubInventory = HubInventory.create(
@@ -48,7 +48,7 @@ public class HubInventoryCommandService {
 
     // 재고 수량 수정
     @Transactional
-    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, String updatedBy) {
+    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
 
         hubInventory.updateQuantity(command.getQuantity(), updatedBy);
@@ -58,7 +58,7 @@ public class HubInventoryCommandService {
 
     // 재고 차감
     @Transactional
-    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, String updatedBy) {
+    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
         hubInventory.decrease(command.getQuantity(), updatedBy);
@@ -66,7 +66,7 @@ public class HubInventoryCommandService {
         return FindHubInventoryResult.from(hubInventory);
     }
 
-    public List<FindHubInventoryResult> decreaseHubInventories(DecreaseHubInventoriesCommand command, String updatedBy) {
+    public List<FindHubInventoryResult> decreaseHubInventories(DecreaseHubInventoriesCommand command, UUID updatedBy) {
         return command.getItems().stream()
                 .map(item -> {
                     HubInventory hubInventory = findActiveHubInventory(item.getHubInventoryId());
@@ -76,7 +76,7 @@ public class HubInventoryCommandService {
                 .toList();
     }
 
-    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProduct(DecreaseHubInventoriesByProductCommand command, String updatedBy) {
+    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProduct(DecreaseHubInventoriesByProductCommand command, UUID updatedBy) {
 
         List<DecreaseHubInventoriesByProductResult.Item> items = command.getOrderItems().stream()
                 .map(orderItem -> {
@@ -106,7 +106,7 @@ public class HubInventoryCommandService {
 
     // 재고 복원
     @Transactional
-    public void restoreHubInventories(RestoreHubInventoriesCommand command, String updatedBy) {
+    public void restoreHubInventories(RestoreHubInventoriesCommand command, UUID updatedBy) {
         command.getOrderItems().forEach(orderItem -> {
             // 실제 복원 대상 재고 조회
             HubInventory hubInventory = findActiveHubInventory(orderItem.getHubInventoryId());
@@ -117,7 +117,7 @@ public class HubInventoryCommandService {
 
     // 논리 삭제
     @Transactional
-    public void deleteHubInventory(UUID hubInventoryId, String deletedBy) {
+    public void deleteHubInventory(UUID hubInventoryId, UUID deletedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
         hubInventory.softDelete(deletedBy);
     }
