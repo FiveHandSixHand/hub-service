@@ -74,9 +74,19 @@ public class HubRouteCommandService {
     public FindHubRouteResult updateHubRoute(UUID hubRouteId, UpdateHubRouteCommand command, UUID updatedBy) {
         HubRoute hubRoute = findActiveHubRoute(hubRouteId);
 
+        Hub srcHub = findActiveHub(hubRoute.getSrcHubId());
+        Hub destHub = findActiveHub(hubRoute.getDestHubId());
+
+        NaverDirectionsClient.RouteMetrics metrics = naverDirectionsClient.getDrivingMetrics(
+                srcHub.getLongitude(),
+                srcHub.getLatitude(),
+                destHub.getLongitude(),
+                destHub.getLatitude()
+        );
+
         hubRoute.updateRouteInfo(
-                command.getDurationTime(),
-                command.getDistance(),
+                metrics.durationMinutes(),
+                metrics.distanceKilometers(),
                 updatedBy
         );
 
