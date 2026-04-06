@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 public enum HubInventoryErrorCode implements ErrorCode {
 
     HUB_INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "허브 재고를 찾을 수 없습니다."),
-    HUB_INVENTORY_CONFLICT(HttpStatus.CONFLICT, "이미 존재하는 허브 재고입니다.");
+    HUB_INVENTORY_CONFLICT(HttpStatus.CONFLICT, "이미 존재하는 허브 재고입니다."),
+    HUB_INVENTORY_DUPLICATED_RESULT(HttpStatus.CONFLICT, "허브 재고가 복수로 조회되었습니다.");
 
     private final HttpStatus status;
     private final String description;

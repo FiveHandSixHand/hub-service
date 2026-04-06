@@ -45,7 +45,7 @@ public class HubRouteServiceTest {
     private static final UUID HUB_ROUTE_ID = UUID.randomUUID();
     private static final UUID SRC_HUB_ID = UUID.randomUUID();
     private static final UUID DEST_HUB_ID = UUID.randomUUID();
-    private static final String USER_ID = "test-user";
+    private static final UUID USER_ID = UUID.randomUUID();
 
     @Test
     @DisplayName("허브 경로 생성 성공")

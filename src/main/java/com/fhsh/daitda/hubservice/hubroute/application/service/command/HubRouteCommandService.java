@@ -31,7 +31,7 @@ public class HubRouteCommandService {
 
     // 허브 경로 생성
     @Transactional
-    public FindHubRouteResult createHubRoute(CreateHubRouteCommand command, String createdBy) {
+    public FindHubRouteResult createHubRoute(CreateHubRouteCommand command, UUID createdBy) {
         findActiveHub(command.getSrcHubId());
         findActiveHub(command.getDestHubId());
         validateDuplicateHubRoute(command.getSrcHubId(), command.getDestHubId());
@@ -57,7 +57,7 @@ public class HubRouteCommandService {
 
     // 허브 경로 정보 수정
     @Transactional
-    public FindHubRouteResult updateHubRoute(UUID hubRouteId, UpdateHubRouteCommand command, String updatedBy) {
+    public FindHubRouteResult updateHubRoute(UUID hubRouteId, UpdateHubRouteCommand command, UUID updatedBy) {
         HubRoute hubRoute = findActiveHubRoute(hubRouteId);
 
         hubRoute.updateRouteInfo(
@@ -71,7 +71,7 @@ public class HubRouteCommandService {
 
     // 허브 경로 논리 삭제
     @Transactional
-    public void deleteHubRoute(UUID hubRouteId, String deletedBy) {
+    public void deleteHubRoute(UUID hubRouteId, UUID deletedBy) {
         HubRoute hubRoute = findActiveHubRoute(hubRouteId);
         hubRoute.softDelete(deletedBy);
     }

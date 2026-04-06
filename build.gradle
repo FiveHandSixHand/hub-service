@@ -56,7 +56,7 @@ dependencies {
     testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'com.fhsh.daitda:common:0.1.1-SNAPSHOT'
+    implementation 'com.fhsh.daitda:common:0.1.4-SNAPSHOT'
 }
 
 dependencyManagement {

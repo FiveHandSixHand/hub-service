@@ -1,10 +1,8 @@
 package com.fhsh.daitda.hubservice.hubinventory.application.service.command;
 
 import com.fhsh.daitda.exception.BusinessException;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.CreateHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.UpdateHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.*;
+import com.fhsh.daitda.hubservice.hubinventory.application.result.DecreaseHubInventoriesByProductResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.domain.entity.HubInventory;
 import com.fhsh.daitda.hubservice.hubinventory.domain.exception.HubInventoryErrorCode;
@@ -13,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 // 허브 재고 도메인의 쓰기 작업(Create /Update/Delete)을 담당
@@ -28,7 +27,7 @@ public class HubInventoryCommandService {
 
     // 재고생성
     @Transactional
-    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, String createdBy) {
+    public FindHubInventoryResult createHubInventory(CreateHubInventoryCommand command, UUID createdBy) {
         validateDuplicateHubInventory(command.getHubId(), command.getCompanyId(), command.getProductId());
 
         HubInventory hubInventory = HubInventory.create(
@@ -49,7 +48,7 @@ public class HubInventoryCommandService {
 
     // 재고 수량 수정
     @Transactional
-    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, String updatedBy) {
+    public FindHubInventoryResult updateHubInventory(UUID hubInventoryId, UpdateHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
 
         hubInventory.updateQuantity(command.getQuantity(), updatedBy);
@@ -59,7 +58,7 @@ public class HubInventoryCommandService {
 
     // 재고 차감
     @Transactional
-    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, String updatedBy) {
+    public FindHubInventoryResult decreaseHubInventory(DecreaseHubInventoryCommand command, UUID updatedBy) {
         HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
 
         hubInventory.decrease(command.getQuantity(), updatedBy);
@@ -67,19 +66,72 @@ public class HubInventoryCommandService {
         return FindHubInventoryResult.from(hubInventory);
     }
 
+    public List<FindHubInventoryResult> decreaseHubInventories(DecreaseHubInventoriesCommand command, UUID updatedBy) {
+        return command.getItems().stream()
+                .map(item -> {
+                    HubInventory hubInventory = findActiveHubInventory(item.getHubInventoryId());
+                    hubInventory.decrease(item.getQuantity(), updatedBy);
+                    return FindHubInventoryResult.from(hubInventory);
+                })
+                .toList();
+    }
+
+    public DecreaseHubInventoriesByProductResult decreaseHubInventoriesByProduct(
+            DecreaseHubInventoriesByProductCommand command,
+            UUID updatedBy
+    ) {
+        List<DecreaseHubInventoriesByProductResult.Item> items = command.getOrderItems().stream()
+                .map(orderItem -> {
+                    // 회사 + 상품 기준으로 조회
+                    List<HubInventory> hubInventories = hubInventoryRepository
+                            .findAllByCompanyIdAndProductIdAndDeletedAtIsNull(
+                                    command.getSupplierCompanyId(),
+                                    orderItem.getProductId()
+                            );
+
+                    // 조회 결과가 없으면 재고가 없는 것이므로 비즈니스 예외 처리
+                    if (hubInventories.isEmpty()) {
+                        throw new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_NOT_FOUND);
+                    }
+
+                    // 현재 전제상 단건이어야 하므로, 복수 조회는 데이터 이상 상태로 간주
+                    if (hubInventories.size() > 1) {
+                        throw new BusinessException(HubInventoryErrorCode.HUB_INVENTORY_DUPLICATED_RESULT);
+                    }
+
+                    // 정상 케이스: 정확히 1건 조회
+                    HubInventory hubInventory = hubInventories.get(0);
+
+                    // 실제 재고 수량 차감
+                    hubInventory.decrease(orderItem.getQuantity(), updatedBy);
+
+                    // 어떤 row를 사용했는지 결과 반환
+                    return DecreaseHubInventoriesByProductResult.Item.builder()
+                            .hubInventoryId(hubInventory.getHubInventoryId())
+                            .productId(hubInventory.getProductId())
+                            .build();
+                })
+                .toList();
+
+        return DecreaseHubInventoriesByProductResult.builder()
+                .items(items)
+                .build();
+    }
+
     // 재고 복원
     @Transactional
-    public FindHubInventoryResult restoreHubInventory(RestoreHubInventoryCommand command, String updatedBy) {
-        HubInventory hubInventory = findActiveHubInventory(command.getHubInventoryId());
-
-        hubInventory.restoreQuantity(command.getQuantity(), updatedBy);
-
-        return FindHubInventoryResult.from(hubInventory);
+    public void restoreHubInventories(RestoreHubInventoriesCommand command, UUID updatedBy) {
+        command.getOrderItems().forEach(orderItem -> {
+            // 실제 복원 대상 재고 조회
+            HubInventory hubInventory = findActiveHubInventory(orderItem.getHubInventoryId());
+            // 조회한 재고 수량 복원
+            hubInventory.restoreQuantity(orderItem.getQuantity(), updatedBy);
+        });
     }
 
     // 논리 삭제
     @Transactional
-    public void deleteHubInventory(UUID hubInventoryId, String deletedBy) {
+    public void deleteHubInventory(UUID hubInventoryId, UUID deletedBy) {
         HubInventory hubInventory = findActiveHubInventory(hubInventoryId);
         hubInventory.softDelete(deletedBy);
     }
