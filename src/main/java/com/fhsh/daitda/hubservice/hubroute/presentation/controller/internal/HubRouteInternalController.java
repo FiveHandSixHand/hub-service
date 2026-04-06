@@ -26,12 +26,12 @@ public class HubRouteInternalController {
      * 출발 허브와 도착 허브 조합으로 허브 경로 조회
      */
     @GetMapping
-    public FindHubRouteResponse getHubRoute(
+    public CommonResponse<FindHubRouteResponse> getHubRoute(
             @RequestParam UUID srcHubId,
             @RequestParam UUID destHubId
     ) {
         FindHubRouteResult result = hubRouteQueryService.searchHubRoute(srcHubId, destHubId);
-        return FindHubRouteResponse.from(result);
+        return CommonResponse.success(FindHubRouteResponse.from(result));
     }
 
     @GetMapping("/path")
