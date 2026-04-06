@@ -1,7 +1,5 @@
 package com.fhsh.daitda.hubservice.hubinventory.presentation.controller.internal;
 
-import com.fhsh.daitda.hubservice.hubinventory.application.command.DecreaseHubInventoryCommand;
-import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.DecreaseHubInventoriesByProductResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.result.FindHubInventoryResult;
 import com.fhsh.daitda.hubservice.hubinventory.application.service.command.HubInventoryCommandService;
@@ -10,7 +8,6 @@ import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.Decrease
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request.RestoreHubInventoryRequest;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.DecreaseHubInventoriesByProductResponse;
 import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.DecreaseHubInventoriesResponse;
-import com.fhsh.daitda.hubservice.hubinventory.presentation.dto.response.FindHubInventoryResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -56,15 +53,9 @@ public class HubInventoryInternalController {
     }
 
     // 재고 복원
-    @PatchMapping("/restore")
-    public ResponseEntity<FindHubInventoryResponse> restoreHubInventory(@Valid @RequestBody RestoreHubInventoryRequest request) {
-        RestoreHubInventoryCommand command = RestoreHubInventoryCommand.builder()
-                .hubInventoryId(request.getHubInventoryId())
-                .quantity(request.getQuantity())
-                .build();
-
-        FindHubInventoryResult result = hubInventoryCommandService.restoreHubInventory(command, null);
-
-        return ResponseEntity.ok(FindHubInventoryResponse.from(result));
+    @PatchMapping("/restoration")
+    public ResponseEntity<Void> restoreHubInventory(@Valid @RequestBody RestoreHubInventoryRequest request) {
+        hubInventoryCommandService.restoreHubInventories(request.toCommand(), null);
+        return ResponseEntity.ok().build();
     }
 }
