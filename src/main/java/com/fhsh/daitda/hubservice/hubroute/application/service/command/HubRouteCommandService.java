@@ -11,7 +11,6 @@ import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
 import com.fhsh.daitda.hubservice.infrastructure.naver.client.NaverDirectionsClient;
-import com.fhsh.daitda.hubservice.infrastructure.naver.dto.NaverDirectionsResponse;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
