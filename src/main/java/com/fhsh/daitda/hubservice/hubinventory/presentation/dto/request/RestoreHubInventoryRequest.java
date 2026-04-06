@@ -1,6 +1,6 @@
 package com.fhsh.daitda.hubservice.hubinventory.presentation.dto.request;
 
-import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoryCommand;
+import com.fhsh.daitda.hubservice.hubinventory.application.command.RestoreHubInventoriesCommand;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -17,10 +17,10 @@ public class RestoreHubInventoryRequest {
     @NotEmpty(message = "복원 항목은 최소 1개 이상이어야 합니다.")
     private List<Item> orderItems;
 
-    public RestoreHubInventoryCommand toCommand() {
-        return RestoreHubInventoryCommand.builder()
+    public RestoreHubInventoriesCommand toCommand() {
+        return RestoreHubInventoriesCommand.builder()
                 .orderItems(orderItems.stream()
-                        .map(item -> RestoreHubInventoryCommand.Item.builder()
+                        .map(item -> RestoreHubInventoriesCommand.Item.builder()
                                 .hubInventoryId(item.getHubInventoryId())
                                 .quantity(item.getQuantity())
                                 .build())

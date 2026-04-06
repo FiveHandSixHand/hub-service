@@ -283,13 +283,13 @@ public class HubInventoryCommandServiceTest {
         ReflectionTestUtils.invokeMethod(inventory2, "prePersist");
         ReflectionTestUtils.setField(inventory2, "hubInventoryId", hubInventoryId2);
 
-        RestoreHubInventoryCommand command = RestoreHubInventoryCommand.builder()
+        RestoreHubInventoriesCommand command = RestoreHubInventoriesCommand.builder()
                 .orderItems(List.of(
-                        RestoreHubInventoryCommand.Item.builder()
+                        RestoreHubInventoriesCommand.Item.builder()
                                 .hubInventoryId(hubInventoryId1)
                                 .quantity(10)
                                 .build(),
-                        RestoreHubInventoryCommand.Item.builder()
+                        RestoreHubInventoriesCommand.Item.builder()
                                 .hubInventoryId(hubInventoryId2)
                                 .quantity(5)
                                 .build()
@@ -315,9 +315,9 @@ public class HubInventoryCommandServiceTest {
         // given
         UUID hubInventoryId = UUID.randomUUID();
 
-        RestoreHubInventoryCommand command = RestoreHubInventoryCommand.builder()
+        RestoreHubInventoriesCommand command = RestoreHubInventoriesCommand.builder()
                 .orderItems(List.of(
-                        RestoreHubInventoryCommand.Item.builder()
+                        RestoreHubInventoriesCommand.Item.builder()
                                 .hubInventoryId(hubInventoryId)
                                 .quantity(10)
                                 .build()

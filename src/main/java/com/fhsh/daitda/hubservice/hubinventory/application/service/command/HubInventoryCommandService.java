@@ -106,7 +106,7 @@ public class HubInventoryCommandService {
 
     // 재고 복원
     @Transactional
-    public void restoreHubInventories(RestoreHubInventoryCommand command, String updatedBy) {
+    public void restoreHubInventories(RestoreHubInventoriesCommand command, String updatedBy) {
         command.getOrderItems().forEach(orderItem -> {
             // 실제 복원 대상 재고 조회
             HubInventory hubInventory = findActiveHubInventory(orderItem.getHubInventoryId());

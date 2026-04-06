@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Getter
 @Builder
-public class RestoreHubInventoryCommand {
+public class RestoreHubInventoriesCommand {
 
     // 복원 대상 목록
     private List<Item> orderItems;
