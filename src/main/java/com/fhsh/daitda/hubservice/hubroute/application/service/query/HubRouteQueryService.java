@@ -187,6 +187,10 @@ public class HubRouteQueryService {
     }
 
     private void validateDifferentHub(UUID srcHubId, UUID destHubId) {
+        if (srcHubId == null || destHubId == null) {
+            throw new IllegalArgumentException("출발 허브와 도착 허브는 필수입니다.");
+        }
+
         if (srcHubId.equals(destHubId)) {
             throw new IllegalArgumentException("출발 허브와 도착 허브는 같을 수 없습니다.");
         }
