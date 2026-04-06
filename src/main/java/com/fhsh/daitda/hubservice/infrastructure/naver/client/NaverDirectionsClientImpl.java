@@ -3,6 +3,7 @@ package com.fhsh.daitda.hubservice.infrastructure.naver.client;
 import com.fhsh.daitda.exception.BusinessException;
 import com.fhsh.daitda.hubservice.infrastructure.naver.dto.NaverDirectionsResponse;
 import com.fhsh.daitda.hubservice.infrastructure.naver.exception.NaverMapErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+@Slf4j
 @Component
 public class NaverDirectionsClientImpl implements NaverDirectionsClient {
 
@@ -61,6 +63,7 @@ public class NaverDirectionsClientImpl implements NaverDirectionsClient {
         } catch (BusinessException e) {
             throw e;
         } catch (RestClientException e) {
+            log.error("Naver directions request failed. start={}, goal={}", start, goal, e);
             throw new BusinessException(NaverMapErrorCode.NAVER_DIRECTIONS_REQUEST_FAILED);
         }
     }
