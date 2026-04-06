@@ -50,7 +50,7 @@ public class Hub extends BaseUserEntity {
     }
 
     public static Hub create(String hubName, String hubAddress, BigDecimal latitude,
-                             BigDecimal longitude, boolean isCentral, String createdBy) {
+                             BigDecimal longitude, boolean isCentral, UUID createdBy) {
 
         Hub hub =  Hub.builder()
                 .hubName(hubName)
@@ -72,7 +72,7 @@ public class Hub extends BaseUserEntity {
     }
 
     public void update(String hubName, String hubAddress, BigDecimal latitude,
-                       BigDecimal longitude, Boolean isCentral, String updatedBy) {
+                       BigDecimal longitude, Boolean isCentral, UUID updatedBy) {
 
         this.hubName = hubName;
         this.hubAddress = hubAddress;
@@ -82,7 +82,7 @@ public class Hub extends BaseUserEntity {
         this.updatedBy = updatedBy;
     }
 
-    public void softDelete(String deletedBy) {
+    public void softDelete(UUID deletedBy) {
         delete(deletedBy);
     }
 
