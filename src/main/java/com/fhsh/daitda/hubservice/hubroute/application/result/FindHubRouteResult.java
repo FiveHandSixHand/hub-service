@@ -23,27 +23,6 @@ public record FindHubRouteResult(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    /**
-     * create / update 응답과의 호환용
-     * - 아직 허브 상세를 붙이지 않는 경우 이름/주소는 null
-     */
-    public static FindHubRouteResult from(HubRoute hubRoute) {
-        return new FindHubRouteResult(
-                hubRoute.getHubRouteId(),
-                hubRoute.getSrcHubId(),
-                null,
-                null,
-                hubRoute.getDestHubId(),
-                null,
-                null,
-                hubRoute.getDurationTime(),
-                toDurationMinutes(hubRoute.getDurationTime()),
-                hubRoute.getDistance(),
-                toDistanceKm(hubRoute.getDistance()),
-                hubRoute.getCreatedAt(),
-                hubRoute.getUpdatedAt()
-        );
-    }
 
     public static FindHubRouteResult from(HubRoute hubRoute, Hub srcHub, Hub destHub) {
         return new FindHubRouteResult(
