@@ -19,20 +19,10 @@ public class CreateHubRouteRequest {
     @NotNull(message = "도착 허브 ID는 필수입니다.")
     private UUID destHubId;
 
-    @NotNull(message = "소요 시간은 필수입니다.")
-    @Positive(message = "소요 시간은 0보다 커야 합니다.")
-    private Integer durationTime;
-
-    @NotNull(message = "이동 거리는 필수입니다.")
-    @Positive(message = "이동 거리는 0보다 커야 합니다.")
-    private BigDecimal distance;
-
     public CreateHubRouteCommand toCommand() {
         return CreateHubRouteCommand.builder()
                 .srcHubId(srcHubId)
                 .destHubId(destHubId)
-                .durationTime(durationTime)
-                .distance(distance)
                 .build();
     }
 }
