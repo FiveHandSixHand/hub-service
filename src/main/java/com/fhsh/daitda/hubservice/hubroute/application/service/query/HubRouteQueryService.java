@@ -1,6 +1,9 @@
 package com.fhsh.daitda.hubservice.hubroute.application.service.query;
 
 import com.fhsh.daitda.exception.BusinessException;
+import com.fhsh.daitda.hubservice.hub.domain.entity.Hub;
+import com.fhsh.daitda.hubservice.hub.domain.exception.HubErrorCode;
+import com.fhsh.daitda.hubservice.hub.domain.repository.HubRepository;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.ListHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
@@ -22,31 +25,34 @@ public class HubRouteQueryService {
     private static final BigDecimal RELAY_THRESHOLD_KM = new BigDecimal("200");
 
     private final HubRouteRepository hubRouteRepository;
+    private final HubRepository hubRepository;
 
-    public HubRouteQueryService(HubRouteRepository hubRouteRepository) {
+    public HubRouteQueryService(HubRouteRepository hubRouteRepository,
+                                HubRepository hubRepository) {
         this.hubRouteRepository = hubRouteRepository;
+        this.hubRepository = hubRepository;
     }
 
     // 삭제되지 않은 전체 허브 경로 목록 조회
     public List<ListHubRouteResult> getHubRoutes() {
         return hubRouteRepository.findAllByDeletedAtIsNull()
                 .stream()
-                .map(hubRoute -> ListHubRouteResult.from(hubRoute))
+                .map(ListHubRouteResult::from)
                 .toList();
     }
 
     // 허브 경로 ID 기준으로 단건 경로 조회
     public FindHubRouteResult getHubRoute(UUID hubRouteId) {
         HubRoute hubRoute = findActiveHubRoute(hubRouteId);
-        return FindHubRouteResult.from(hubRoute);
+        return toFindHubRouteResult(hubRoute);
     }
 
-    //  출발 허브와 도착 허브 조합으로 개별 구간 route를 조회
+    // 출발 허브와 도착 허브 조합으로 개별 구간 route를 조회
     public FindHubRouteResult searchHubRoute(UUID srcHubId, UUID destHubId) {
         HubRoute hubRoute = hubRouteRepository.findBySrcHubIdAndDestHubIdAndDeletedAtIsNull(srcHubId, destHubId)
                 .orElseThrow(() -> new BusinessException(HubRouteErrorCode.HUB_ROUTE_NOT_FOUND));
 
-        return FindHubRouteResult.from(hubRoute);
+        return toFindHubRouteResult(hubRoute);
     }
 
     /**
@@ -62,12 +68,23 @@ public class HubRouteQueryService {
         Optional<HubRoute> directRoute = hubRouteRepository.findBySrcHubIdAndDestHubIdAndDeletedAtIsNull(srcHubId, destHubId);
 
         if (directRoute.isPresent() && directRoute.get().getDistance().compareTo(RELAY_THRESHOLD_KM) < 0) {
-            return List.of(FindHubRouteResult.from(directRoute.get()));
+            return List.of(toFindHubRouteResult(directRoute.get()));
         }
 
         return findRelayPath(srcHubId, destHubId).stream()
-                .map(hubRoute -> FindHubRouteResult.from(hubRoute))
+                .map(this::toFindHubRouteResult)
                 .toList();
+    }
+
+    private FindHubRouteResult toFindHubRouteResult(HubRoute hubRoute) {
+        Hub srcHub = findActiveHub(hubRoute.getSrcHubId());
+        Hub destHub = findActiveHub(hubRoute.getDestHubId());
+        return FindHubRouteResult.from(hubRoute, srcHub, destHub);
+    }
+
+    private Hub findActiveHub(UUID hubId) {
+        return hubRepository.findByHubIdAndDeletedAtIsNull(hubId)
+                .orElseThrow(() -> new BusinessException(HubErrorCode.HUB_NOT_FOUND));
     }
 
     /**
@@ -93,7 +110,7 @@ public class HubRouteQueryService {
         Map<UUID, HubRoute> previousRouteMap = new HashMap<>();
 
         PriorityQueue<RouteNode> pq = new PriorityQueue<>((o1, o2) ->
-            o1.distance().compareTo(o2.distance())
+                o1.distance().compareTo(o2.distance())
         );
 
         distanceMap.put(srcHubId, BigDecimal.ZERO);
@@ -137,24 +154,6 @@ public class HubRouteQueryService {
         return reconstructPath(previousRouteMap, srcHubId, destHubId);
     }
 
-    /**
-     * active route row들을 src 기준 그래프 형태로 변환
-     *
-     * 기능:
-     * - key: 출발 허브 ID
-     * - value: 그 허브에서 출발하는 route 목록
-     *
-     * 예시:
-     * - 서울 -> 대전
-     * - 서울 -> 강릉
-     *
-     * 그러면 graph.get(서울) 은
-     * [서울->대전, 서울->강릉]
-     *
-     * 별도 메서드로 분리한 이유
-     * - path 계산 로직 본문이 너무 길어지지 않게 하기 위해
-     * - "route 목록을 그래프로 본다"는 의도를 메서드 이름으로 드러내기 위해
-     */
     private Map<UUID, List<HubRoute>> buildGraph(List<HubRoute> routes) {
         Map<UUID, List<HubRoute>> graph = new HashMap<>();
 
@@ -166,8 +165,7 @@ public class HubRouteQueryService {
 
     private List<HubRoute> reconstructPath(Map<UUID, HubRoute> previousRouteMap,
                                            UUID srcHubId,
-                                           UUID destHubId)
-    {
+                                           UUID destHubId) {
         List<HubRoute> path = new ArrayList<>();
         UUID currentHubId = destHubId;
 

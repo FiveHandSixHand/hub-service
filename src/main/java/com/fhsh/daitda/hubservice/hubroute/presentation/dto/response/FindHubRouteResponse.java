@@ -9,9 +9,15 @@ import java.util.UUID;
 public record FindHubRouteResponse(
         UUID hubRouteId,
         UUID srcHubId,
+        String srcHubName,
+        String srcHubAddress,
         UUID destHubId,
+        String destHubName,
+        String destHubAddress,
         Integer durationTime,
+        String durationMinutes,
         BigDecimal distance,
+        String distanceKm,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -19,9 +25,15 @@ public record FindHubRouteResponse(
         return new FindHubRouteResponse(
                 result.hubRouteId(),
                 result.srcHubId(),
+                result.srcHubName(),
+                result.srcHubAddress(),
                 result.destHubId(),
+                result.destHubName(),
+                result.destHubAddress(),
                 result.durationTime(),
+                result.durationMinutes(),
                 result.distance(),
+                result.distanceKm(),
                 result.createdAt(),
                 result.updatedAt()
         );
