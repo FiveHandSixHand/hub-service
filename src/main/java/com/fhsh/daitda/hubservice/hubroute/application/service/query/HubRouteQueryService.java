@@ -93,7 +93,7 @@ public class HubRouteQueryService {
         Map<UUID, HubRoute> previousRouteMap = new HashMap<>();
 
         PriorityQueue<RouteNode> pq = new PriorityQueue<>((o1, o2) ->
-            o1.distance().compareTo(o2.distance)
+            o1.distance().compareTo(o2.distance())
         );
 
         distanceMap.put(srcHubId, BigDecimal.ZERO);
@@ -103,7 +103,7 @@ public class HubRouteQueryService {
             RouteNode current = pq.poll();
 
             BigDecimal knownDistance = distanceMap.getOrDefault(
-                    current.hubId,
+                    current.hubId(),
                     BigDecimal.valueOf(Double.MAX_VALUE)
             );
 
@@ -115,7 +115,7 @@ public class HubRouteQueryService {
                 break;
             }
 
-            List<HubRoute> nextRoutes = graph.getOrDefault(current.hubId, Collections.emptyList());
+            List<HubRoute> nextRoutes = graph.getOrDefault(current.hubId(), Collections.emptyList());
 
             for (HubRoute nextRoute : nextRoutes) {
                 UUID nextHubId = nextRoute.getDestHubId();
@@ -159,7 +159,7 @@ public class HubRouteQueryService {
         Map<UUID, List<HubRoute>> graph = new HashMap<>();
 
         for (HubRoute route : routes) {
-            graph.computeIfAbsent(route.getSrcHubId(), Key -> new ArrayList<>()).add(route);
+            graph.computeIfAbsent(route.getSrcHubId(), key -> new ArrayList<>()).add(route);
         }
         return graph;
     }
