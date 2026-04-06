@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("/internal/v1/hub-inventories")
 public class HubInventoryInternalController {
 
-    private static final String INTERNAL_SYSTEM = "SYSTEM";
 
     private final HubInventoryCommandService hubInventoryCommandService;
 
@@ -33,7 +32,7 @@ public class HubInventoryInternalController {
     @PatchMapping("/decrease")
     public CommonResponse<DecreaseHubInventoriesResponse> decreaseHubInventory(@Valid @RequestBody DecreaseHubInventoryRequest request) {
         List<FindHubInventoryResult> results =
-                hubInventoryCommandService.decreaseHubInventories(request.toCommand(), INTERNAL_SYSTEM);
+                hubInventoryCommandService.decreaseHubInventories(request.toCommand(), null);
 
         return CommonResponse.success(DecreaseHubInventoriesResponse.from(results));
     }
@@ -49,7 +48,7 @@ public class HubInventoryInternalController {
             @Valid @RequestBody DecreaseHubInventoriesByProductRequest request
     ) {
         DecreaseHubInventoriesByProductResult result =
-                hubInventoryCommandService.decreaseHubInventoriesByProduct(request.toCommand(), INTERNAL_SYSTEM);
+                hubInventoryCommandService.decreaseHubInventoriesByProduct(request.toCommand(), null);
 
         return CommonResponse.success(DecreaseHubInventoriesByProductResponse.from(result));
     }
@@ -57,7 +56,7 @@ public class HubInventoryInternalController {
     // 재고 복원
     @PatchMapping("/restoration")
     public CommonResponse<Void> restoreHubInventory(@Valid @RequestBody RestoreHubInventoryRequest request) {
-        hubInventoryCommandService.restoreHubInventories(request.toCommand(), INTERNAL_SYSTEM);
+        hubInventoryCommandService.restoreHubInventories(request.toCommand(), null);
         return CommonResponse.success(null);
     }
 }
