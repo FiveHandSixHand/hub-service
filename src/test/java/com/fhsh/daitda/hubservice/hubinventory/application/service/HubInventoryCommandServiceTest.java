@@ -269,6 +269,41 @@ public class HubInventoryCommandServiceTest {
     }
 
     @Test
+    @DisplayName("회사와 상품 기준 조회 결과가 복수이면 주문 생성용 차감은 실패한다")
+    void 주문생성용_재고차감_실패_복수조회() {
+        // given
+        UUID supplierCompanyId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+
+        HubInventory inventory1 = HubInventory.create(HUB_ID, supplierCompanyId, productId, 100, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory1, "prePersist");
+        ReflectionTestUtils.setField(inventory1, "hubInventoryId", UUID.randomUUID());
+
+        HubInventory inventory2 = HubInventory.create(HUB_ID, supplierCompanyId, productId, 80, USER_ID);
+        ReflectionTestUtils.invokeMethod(inventory2, "prePersist");
+        ReflectionTestUtils.setField(inventory2, "hubInventoryId", UUID.randomUUID());
+
+        DecreaseHubInventoriesByProductCommand command = DecreaseHubInventoriesByProductCommand.builder()
+                .supplierCompanyId(supplierCompanyId)
+                .orderItems(List.of(
+                        DecreaseHubInventoriesByProductCommand.Item.builder()
+                                .productId(productId)
+                                .quantity(10)
+                                .build()
+                ))
+                .build();
+
+        when(hubInventoryRepository.findAllByCompanyIdAndProductIdAndDeletedAtIsNull(supplierCompanyId, productId))
+                .thenReturn(List.of(inventory1, inventory2));
+
+        // when & then
+        assertThatThrownBy(() -> hubInventoryCommandService.decreaseHubInventoriesByProduct(command, USER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(HubInventoryErrorCode.HUB_INVENTORY_DUPLICATED_RESULT);
+    }
+
+    @Test
     @DisplayName("여러 재고를 한 번에 복원할 수 있다")
     void 여러재고_일괄복원성공() {
         // given
