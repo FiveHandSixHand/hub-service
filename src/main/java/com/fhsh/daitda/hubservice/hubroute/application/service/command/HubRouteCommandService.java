@@ -36,6 +36,8 @@ public class HubRouteCommandService {
     // 허브 경로 생성
     @Transactional
     public FindHubRouteResult createHubRoute(CreateHubRouteCommand command, UUID createdBy) {
+        validateDifferentHub(command.getSrcHubId(), command.getDestHubId());
+
         Hub srcHub = findActiveHub(command.getSrcHubId());
         Hub destHub = findActiveHub(command.getDestHubId());
 
@@ -106,6 +108,16 @@ public class HubRouteCommandService {
 
         if (exists) {
             throw new BusinessException(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
+        }
+    }
+
+    private void validateDifferentHub(UUID srcHubId, UUID destHubId) {
+        if (srcHubId == null || destHubId == null) {
+            throw new IllegalArgumentException("출발 허브와 도착 허브는 필수입니다.");
+        }
+
+        if (srcHubId.equals(destHubId)) {
+            throw new IllegalArgumentException("출발 허브와 도착 허브는 같을 수 없습니다.");
         }
     }
 
