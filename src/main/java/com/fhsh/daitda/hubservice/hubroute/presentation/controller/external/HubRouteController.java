@@ -31,7 +31,9 @@ public class HubRouteController {
 
     /**
      * 출발 허브와 도착 허브 기준의 허브 경로를 생성
-     * 명세상 MASTER 권한이 필요한 API이므로 현재 인증 시스템에서는 ADMIN 권한으로 매핑하여 검증
+     *
+     * 거리와 시간은 요청에서 직접 받지 않고
+     * 카카오 길찾기 계산 결과를 기반으로 저장
      */
     @PostMapping
     public FindHubRouteResponse createHubRoute(@Valid @RequestBody CreateHubRouteRequest request,
@@ -42,13 +44,16 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        FindHubRouteResult result = hubRouteCommandService.createHubRoute(request.toCommand(), authenticatedUser.userId());
+        FindHubRouteResult result = hubRouteCommandService.createHubRoute(
+                request.toCommand(),
+                authenticatedUser.userId()
+        );
+
         return FindHubRouteResponse.from(result);
     }
 
     /**
      * 삭제되지 않은 전체 허브 경로 목록을 조회
-     * 명세상 ALL 권한 API이므로 인증된 사용자 역할이면 모두 허용
      */
     @GetMapping
     public List<ListHubRouteResponse> getHubRoutes(@RequestHeader(SecurityHeaderConstants.USER_ID) String userId,
@@ -61,13 +66,12 @@ public class HubRouteController {
         List<ListHubRouteResult> results = hubRouteQueryService.getHubRoutes();
 
         return results.stream()
-                .map(result -> ListHubRouteResponse.from(result))
+                .map(ListHubRouteResponse::from)
                 .toList();
     }
 
     /**
      * 허브 경로 ID 기준으로 단건 상세 정보를 조회
-     * 명세상 ALL 권한 API이므로 인증된 사용자 역할이면 모두 허용
      */
     @GetMapping("/{hubRouteId}")
     public FindHubRouteResponse getHubRoute(@PathVariable UUID hubRouteId,
@@ -84,7 +88,6 @@ public class HubRouteController {
 
     /**
      * 출발 허브와 도착 허브 조합으로 허브 경로를 조회
-     * 명세상 ALL 권한 API이므로 인증된 사용자 역할이면 모두 허용
      */
     @GetMapping("/search")
     public FindHubRouteResponse searchHubRoute(@RequestParam UUID srcHubId,
@@ -101,8 +104,11 @@ public class HubRouteController {
     }
 
     /**
-     * 허브 경로의 소요 시간과 이동 거리를 수정
-     * 명세상 MASTER 권한이 필요한 API이므로 현재 인증 시스템에서는 ADMIN 권한으로 매핑하여 검증
+     * 허브 경로를 재계산
+     *
+     * 빈 DTO를 유지하되, 실제로는 request 값으로 수정하지 않고
+     * 기존 route의 src/dest 허브를 기준으로 Naver Directions를 다시 호출해
+     * 거리와 시간을 재계산
      */
     @PatchMapping("/{hubRouteId}")
     public FindHubRouteResponse updateHubRoute(@PathVariable UUID hubRouteId,
@@ -114,14 +120,18 @@ public class HubRouteController {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.fromHeaders(userId, email, role);
         AuthorizationUtils.validateMasterAccess(authenticatedUser);
 
-        FindHubRouteResult result = hubRouteCommandService.updateHubRoute(hubRouteId, request.toCommand(), authenticatedUser.userId());
+        FindHubRouteResult result = hubRouteCommandService.updateHubRoute(
+                hubRouteId,
+                request.toCommand(),
+                authenticatedUser.userId()
+        );
+
         return FindHubRouteResponse.from(result);
     }
 
     /**
      * 허브 경로를 논리 삭제
-     * 지금은 삭제 성공 여부만 의미가 있어 별도 응답 본문 없이 void처리
-     * 명세상 MASTER 권한이 필요한 API이므로 현재 인증 시스템에서는 ADMIN 권한으로 매핑하여 검증
+     * 지금은 삭제 성공 여부만 의미가 있어 별도 응답 본문 없이 void 처리
      */
     @DeleteMapping("/{hubRouteId}")
     public void deleteHubRoute(@PathVariable UUID hubRouteId,

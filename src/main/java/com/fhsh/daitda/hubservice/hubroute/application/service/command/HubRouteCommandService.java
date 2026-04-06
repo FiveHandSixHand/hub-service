@@ -10,6 +10,7 @@ import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult
 import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 import com.fhsh.daitda.hubservice.hubroute.domain.exception.HubRouteErrorCode;
 import com.fhsh.daitda.hubservice.hubroute.domain.repository.HubRouteRepository;
+import com.fhsh.daitda.hubservice.infrastructure.kakao.client.KakaoDirectionsClient;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -23,24 +24,38 @@ public class HubRouteCommandService {
 
     private final HubRouteRepository hubRouteRepository;
     private final HubRepository hubRepository;
+    private final KakaoDirectionsClient kakaoDirectionsClient;
 
-    public HubRouteCommandService(HubRouteRepository hubRouteRepository, HubRepository hubRepository) {
+    public HubRouteCommandService(HubRouteRepository hubRouteRepository,
+                                  HubRepository hubRepository,
+                                  KakaoDirectionsClient kakaoDirectionsClient) {
         this.hubRouteRepository = hubRouteRepository;
         this.hubRepository = hubRepository;
+        this.kakaoDirectionsClient = kakaoDirectionsClient;
     }
 
     // 허브 경로 생성
     @Transactional
     public FindHubRouteResult createHubRoute(CreateHubRouteCommand command, UUID createdBy) {
-        findActiveHub(command.getSrcHubId());
-        findActiveHub(command.getDestHubId());
+        validateDifferentHub(command.getSrcHubId(), command.getDestHubId());
+
+        Hub srcHub = findActiveHub(command.getSrcHubId());
+        Hub destHub = findActiveHub(command.getDestHubId());
+
         validateDuplicateHubRoute(command.getSrcHubId(), command.getDestHubId());
+
+        KakaoDirectionsClient.RouteMetrics metrics = kakaoDirectionsClient.getDrivingMetrics(
+                srcHub.getLongitude(),
+                srcHub.getLatitude(),
+                destHub.getLongitude(),
+                destHub.getLatitude()
+        );
 
         HubRoute hubRoute = HubRoute.create(
                 command.getSrcHubId(),
                 command.getDestHubId(),
-                command.getDurationTime(),
-                command.getDistance(),
+                metrics.durationMinutes(),
+                metrics.distanceKilometers(),
                 createdBy
         );
 
@@ -60,9 +75,19 @@ public class HubRouteCommandService {
     public FindHubRouteResult updateHubRoute(UUID hubRouteId, UpdateHubRouteCommand command, UUID updatedBy) {
         HubRoute hubRoute = findActiveHubRoute(hubRouteId);
 
+        Hub srcHub = findActiveHub(hubRoute.getSrcHubId());
+        Hub destHub = findActiveHub(hubRoute.getDestHubId());
+
+        KakaoDirectionsClient.RouteMetrics metrics = kakaoDirectionsClient.getDrivingMetrics(
+                srcHub.getLongitude(),
+                srcHub.getLatitude(),
+                destHub.getLongitude(),
+                destHub.getLatitude()
+        );
+
         hubRoute.updateRouteInfo(
-                command.getDurationTime(),
-                command.getDistance(),
+                metrics.durationMinutes(),
+                metrics.distanceKilometers(),
                 updatedBy
         );
 
@@ -94,6 +119,16 @@ public class HubRouteCommandService {
 
         if (exists) {
             throw new BusinessException(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
+        }
+    }
+
+    private void validateDifferentHub(UUID srcHubId, UUID destHubId) {
+        if (srcHubId == null || destHubId == null) {
+            throw new IllegalArgumentException("출발 허브와 도착 허브는 필수입니다.");
+        }
+
+        if (srcHubId.equals(destHubId)) {
+            throw new IllegalArgumentException("출발 허브와 도착 허브는 같을 수 없습니다.");
         }
     }
 

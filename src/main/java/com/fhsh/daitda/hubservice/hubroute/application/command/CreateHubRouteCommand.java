@@ -12,6 +12,4 @@ public class CreateHubRouteCommand {
 
     private UUID srcHubId;
     private UUID destHubId;
-    private Integer durationTime;
-    private BigDecimal distance;
 }
