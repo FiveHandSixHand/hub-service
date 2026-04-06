@@ -20,7 +20,7 @@ public class DecreaseHubInventoriesByProductRequest {
     // 주문 항목 목록
     @Valid
     @NotEmpty(message = "주문 항목은 최소 1개 이상이어야 합니다.")
-    private List<Item> orderItems;
+    private List<@NotNull(message = "주문 항목에 null 요소를 포함할 수 없습니다.") @Valid Item> orderItems;
 
     public DecreaseHubInventoriesByProductCommand toCommand() {
         return DecreaseHubInventoriesByProductCommand.builder()
