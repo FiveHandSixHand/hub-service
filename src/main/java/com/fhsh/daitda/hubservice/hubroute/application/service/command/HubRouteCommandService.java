@@ -61,7 +61,7 @@ public class HubRouteCommandService {
 
         try {
             HubRoute savedHubRoute = hubRouteRepository.saveAndFlush(hubRoute);
-            return FindHubRouteResult.from(savedHubRoute);
+            return FindHubRouteResult.from(savedHubRoute, srcHub, destHub);
         } catch (DataIntegrityViolationException e) {
             if (isUniqueConstraintViolation(e)) {
                 throw new BusinessException(HubRouteErrorCode.HUB_ROUTE_CONFLICT);
@@ -69,7 +69,6 @@ public class HubRouteCommandService {
             throw e;
         }
     }
-
     // 허브 경로 정보 수정
     @Transactional
     public FindHubRouteResult updateHubRoute(UUID hubRouteId, UpdateHubRouteCommand command, UUID updatedBy) {
@@ -91,7 +90,7 @@ public class HubRouteCommandService {
                 updatedBy
         );
 
-        return FindHubRouteResult.from(hubRoute);
+        return FindHubRouteResult.from(hubRoute, srcHub, destHub);
     }
 
     // 허브 경로 논리 삭제

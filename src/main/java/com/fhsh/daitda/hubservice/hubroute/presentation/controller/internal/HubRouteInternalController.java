@@ -1,7 +1,9 @@
 package com.fhsh.daitda.hubservice.hubroute.presentation.controller.internal;
 
+import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRoutePathResult;
 import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
 import com.fhsh.daitda.hubservice.hubroute.application.service.query.HubRouteQueryService;
+import com.fhsh.daitda.hubservice.hubroute.presentation.dto.response.FindHubRoutePathResponse;
 import com.fhsh.daitda.hubservice.hubroute.presentation.dto.response.FindHubRouteResponse;
 import com.fhsh.daitda.response.CommonResponse;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,11 +37,14 @@ public class HubRouteInternalController {
     }
 
     @GetMapping("/path")
-    public CommonResponse<List<FindHubRouteResponse>> getHubRoutePath(@RequestParam UUID srcHubId, @RequestParam UUID destHubId) {
-        List<FindHubRouteResult> results = hubRouteQueryService.getHubRoutePath(srcHubId, destHubId);
+    public CommonResponse<List<FindHubRoutePathResponse>> getHubRoutePath(
+            @RequestParam UUID srcHubId,
+            @RequestParam UUID destHubId
+    ) {
+        List<FindHubRoutePathResult> results = hubRouteQueryService.getHubRoutePath(srcHubId, destHubId);
 
-        List<FindHubRouteResponse> responses = results.stream()
-                .map(result -> FindHubRouteResponse.from(result))
+        List<FindHubRoutePathResponse> responses = results.stream()
+                .map(FindHubRoutePathResponse::from)
                 .toList();
 
         return CommonResponse.success(responses);

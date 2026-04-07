@@ -1,12 +1,12 @@
 package com.fhsh.daitda.hubservice.hubroute.presentation.dto.response;
 
-import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRouteResult;
+import com.fhsh.daitda.hubservice.hubroute.application.result.FindHubRoutePathResult;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record FindHubRouteResponse(
+public record FindHubRoutePathResponse(
+        Integer sequence,
         UUID hubRouteId,
         UUID srcHubId,
         String srcHubName,
@@ -17,12 +17,11 @@ public record FindHubRouteResponse(
         Integer durationTime,
         String durationMinutes,
         BigDecimal distance,
-        String distanceKm,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        String distanceKm
 ) {
-    public static FindHubRouteResponse from(FindHubRouteResult result) {
-        return new FindHubRouteResponse(
+    public static FindHubRoutePathResponse from(FindHubRoutePathResult result) {
+        return new FindHubRoutePathResponse(
+                result.sequence(),
                 result.hubRouteId(),
                 result.srcHubId(),
                 result.srcHubName(),
@@ -33,9 +32,7 @@ public record FindHubRouteResponse(
                 result.durationTime(),
                 result.durationMinutes(),
                 result.distance(),
-                result.distanceKm(),
-                result.createdAt(),
-                result.updatedAt()
+                result.distanceKm()
         );
     }
 }

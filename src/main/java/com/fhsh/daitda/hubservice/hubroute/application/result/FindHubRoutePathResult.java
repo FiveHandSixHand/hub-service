@@ -5,10 +5,10 @@ import com.fhsh.daitda.hubservice.hubroute.domain.entity.HubRoute;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record FindHubRouteResult(
+public record FindHubRoutePathResult(
+        Integer sequence,
         UUID hubRouteId,
         UUID srcHubId,
         String srcHubName,
@@ -19,13 +19,11 @@ public record FindHubRouteResult(
         Integer durationTime,
         String durationMinutes,
         BigDecimal distance,
-        String distanceKm,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        String distanceKm
 ) {
-
-    public static FindHubRouteResult from(HubRoute hubRoute, Hub srcHub, Hub destHub) {
-        return new FindHubRouteResult(
+    public static FindHubRoutePathResult from(Integer sequence, HubRoute hubRoute, Hub srcHub, Hub destHub) {
+        return new FindHubRoutePathResult(
+                sequence,
                 hubRoute.getHubRouteId(),
                 hubRoute.getSrcHubId(),
                 srcHub.getHubName(),
@@ -36,9 +34,7 @@ public record FindHubRouteResult(
                 hubRoute.getDurationTime(),
                 toDurationMinutes(hubRoute.getDurationTime()),
                 hubRoute.getDistance(),
-                toDistanceKm(hubRoute.getDistance()),
-                hubRoute.getCreatedAt(),
-                hubRoute.getUpdatedAt()
+                toDistanceKm(hubRoute.getDistance())
         );
     }
 
