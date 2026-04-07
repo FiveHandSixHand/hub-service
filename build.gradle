@@ -64,6 +64,11 @@ dependencies {
     // 아직 infra-repo에는 prometheus가 없습니다. 추가하시고 주석처리 해주세요.
     // docker에 올라가면 공지 하겠습니다!
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+// Tracing & Zipkin
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 }
 
 dependencyManagement {
