@@ -15,9 +15,9 @@ public record FindHubRoutePathResponse(
         String destHubName,
         String destHubAddress,
         Integer durationTime,
-        String durationMinutes,
+        String durationText,
         BigDecimal distance,
-        String distanceKm
+        String distanceText
 ) {
     public static FindHubRoutePathResponse from(FindHubRoutePathResult result) {
         return new FindHubRoutePathResponse(
@@ -30,9 +30,9 @@ public record FindHubRoutePathResponse(
                 result.destHubName(),
                 result.destHubAddress(),
                 result.durationTime(),
-                result.durationMinutes(),
+                result.durationText(),
                 result.distance(),
-                result.distanceKm()
+                result.distanceText()
         );
     }
 }

@@ -15,9 +15,9 @@ public record FindHubRouteResponse(
         String destHubName,
         String destHubAddress,
         Integer durationTime,
-        String durationMinutes,
+        String durationText,
         BigDecimal distance,
-        String distanceKm,
+        String distanceText,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -31,9 +31,9 @@ public record FindHubRouteResponse(
                 result.destHubName(),
                 result.destHubAddress(),
                 result.durationTime(),
-                result.durationMinutes(),
+                result.durationText(),
                 result.distance(),
-                result.distanceKm(),
+                result.distanceText(),
                 result.createdAt(),
                 result.updatedAt()
         );

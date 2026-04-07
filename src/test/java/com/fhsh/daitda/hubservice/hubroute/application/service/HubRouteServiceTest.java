@@ -79,6 +79,7 @@ public class HubRouteServiceTest {
                 destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 95,
+                123_450L,
                 new BigDecimal("123.45")
         ));
 
@@ -209,6 +210,7 @@ public class HubRouteServiceTest {
                 destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 95,
+                123_450L,
                 new BigDecimal("123.45")
         ));
 
@@ -336,6 +338,7 @@ public class HubRouteServiceTest {
                 destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 95,
+                123_450L,
                 new BigDecimal("123.45")
         ));
 
@@ -396,6 +399,7 @@ public class HubRouteServiceTest {
                 destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 77,
+                101_250L,
                 new BigDecimal("101.25")
         ));
 
