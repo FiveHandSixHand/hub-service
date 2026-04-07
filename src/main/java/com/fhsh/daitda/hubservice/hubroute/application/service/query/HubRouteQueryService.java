@@ -24,7 +24,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class HubRouteQueryService {
 
-    private static final BigDecimal RELAY_THRESHOLD_KM = new BigDecimal("200");
+    private static final long RELAY_THRESHOLD_METERS = 200_000L;
 
     private final HubRouteRepository hubRouteRepository;
     private final HubRepository hubRepository;
@@ -83,7 +83,7 @@ public class HubRouteQueryService {
         );
 
         // 200km 미만이면 직행 1건 반환
-        if (directMetrics.distanceKilometers().compareTo(RELAY_THRESHOLD_KM) < 0) {
+        if (directMetrics.distanceMeters() < RELAY_THRESHOLD_METERS) {
             return List.of(
                     toPathResult(
                             1,
@@ -153,7 +153,7 @@ public class HubRouteQueryService {
         // 가장 적절하다고 판단된 경유 허브
         Hub bestRelayHub = null;
         // 가장 짧은 총거리 (출발 - 경유 + 경유 - 도착)
-        BigDecimal bestTotalDistance = null;
+        Long bestTotalDistanceMeters = null;
 
         for (Hub candidate : hubs) {
             // 출발, 도착 허브는 경유가 될 수 없음
@@ -182,19 +182,19 @@ public class HubRouteQueryService {
             );
 
             // 두 구간 모두 200km 미만이어야 유효한 후보
-            if (firstMetrics.distanceKilometers().compareTo(RELAY_THRESHOLD_KM) >= 0) {
+            if (firstMetrics.distanceMeters() >= RELAY_THRESHOLD_METERS) {
                 continue;
             }
-            if (secondMetrics.distanceKilometers().compareTo(RELAY_THRESHOLD_KM) >= 0) {
+            if (secondMetrics.distanceMeters() >= RELAY_THRESHOLD_METERS) {
                 continue;
             }
 
             // 후보 허브를 경유했을 떄의 총 거리
-            BigDecimal totalDistance = firstMetrics.distanceKilometers().add(secondMetrics.distanceKilometers());
+            long totalDistanceMeters = firstMetrics.distanceMeters() + secondMetrics.distanceMeters();
 
             // 아직 선택된 후보가 없거나 더 좋은 후보가 있을시 갱신
-            if (bestTotalDistance == null || totalDistance.compareTo(bestTotalDistance) < 0) {
-                bestTotalDistance = totalDistance;
+            if (bestTotalDistanceMeters == null || totalDistanceMeters < bestTotalDistanceMeters) {
+                bestTotalDistanceMeters = totalDistanceMeters;
                 bestRelayHub = candidate;
             }
         }

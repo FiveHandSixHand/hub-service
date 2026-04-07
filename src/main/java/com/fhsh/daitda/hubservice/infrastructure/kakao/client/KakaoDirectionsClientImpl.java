@@ -68,10 +68,11 @@ public class KakaoDirectionsClientImpl implements KakaoDirectionsClient {
 
             int durationMinutes = Math.max(1, (summary.duration() + 59) / 60);
 
-            BigDecimal distanceKilometers = BigDecimal.valueOf(summary.distance())
+            long distanceMeters = summary.distance().longValue();
+            BigDecimal distanceKilometers = BigDecimal.valueOf(distanceMeters)
                     .divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
 
-            return new RouteMetrics(durationMinutes, distanceKilometers);
+            return new RouteMetrics(durationMinutes, distanceMeters, distanceKilometers);
 
         } catch (BusinessException e) {
             throw e;

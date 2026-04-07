@@ -23,6 +23,7 @@ public interface KakaoDirectionsClient {
      */
     record RouteMetrics(
             Integer durationMinutes,
+            long distanceMeters,
             BigDecimal distanceKilometers
     ) {
     }

@@ -125,6 +125,7 @@ class HubRouteQueryServiceTest {
                 destHub.getLongitude(), destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 81,
+                86_190L,
                 new BigDecimal("86.19")
         ));
 
@@ -202,6 +203,7 @@ class HubRouteQueryServiceTest {
                 destHub.getLongitude(), destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 227,
+                299_740L,
                 new BigDecimal("299.74")
         ));
 
@@ -211,6 +213,7 @@ class HubRouteQueryServiceTest {
                 relayHub.getLongitude(), relayHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 125,
+                151_760L,
                 new BigDecimal("151.76")
         ));
         when(kakaoDirectionsClient.getDrivingMetrics(
@@ -218,6 +221,7 @@ class HubRouteQueryServiceTest {
                 destHub.getLongitude(), destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 153,
+                173_650L,
                 new BigDecimal("173.65")
         ));
 
@@ -227,6 +231,7 @@ class HubRouteQueryServiceTest {
                 anotherHub.getLongitude(), anotherHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 150,
+                180_000L,
                 new BigDecimal("180.00")
         ));
         when(kakaoDirectionsClient.getDrivingMetrics(
@@ -234,6 +239,7 @@ class HubRouteQueryServiceTest {
                 destHub.getLongitude(), destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 165,
+                190_000L,
                 new BigDecimal("190.00")
         ));
 
@@ -310,6 +316,7 @@ class HubRouteQueryServiceTest {
                 destHub.getLongitude(), destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 227,
+                299_740L,
                 new BigDecimal("299.74")
         ));
 
@@ -319,6 +326,7 @@ class HubRouteQueryServiceTest {
                 relayHub.getLongitude(), relayHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 170,
+                210_000L,
                 new BigDecimal("210.00")
         ));
         when(kakaoDirectionsClient.getDrivingMetrics(
@@ -326,6 +334,7 @@ class HubRouteQueryServiceTest {
                 destHub.getLongitude(), destHub.getLatitude()
         )).thenReturn(new KakaoDirectionsClient.RouteMetrics(
                 120,
+                150_000L,
                 new BigDecimal("150.00")
         ));
 
