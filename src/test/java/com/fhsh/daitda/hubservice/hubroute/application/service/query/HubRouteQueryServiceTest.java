@@ -61,8 +61,8 @@ public class HubRouteQueryServiceTest {
         assertThat(results.get(0).destHubId()).isEqualTo(DEST_HUB_ID);
         assertThat(results.get(0).srcHubName()).isEqualTo("서울 허브");
         assertThat(results.get(0).destHubName()).isEqualTo("대전 허브");
-        assertThat(results.get(0).durationMinutes()).isEqualTo("120분");
-        assertThat(results.get(0).distanceKm()).isEqualTo("150.00km");
+        assertThat(results.get(0).durationTime()).isEqualTo("120분");
+        assertThat(results.get(0).distanceText()).isEqualTo("150.00km");
     }
 
     @Test
